@@ -1,0 +1,727 @@
+/**
+    * @name Appled
+    * @description A theme that uses amoled black color.
+    * @version 1.0.0
+    * @author GYAT
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+    @font-face {
+        font-family: 'SF Mono Light';
+        src: url('https://github.com/Menci/sf-mono-webfont/raw/master/sf-mono-light.woff2') format('woff2');
+        font-weight: lighter;
+        font-style: normal;
+    }
+
+   @font-face {
+        font-family: 'SF Mono Regular';
+        src: url('https://github.com/Menci/sf-mono-webfont/raw/master/sf-mono-regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    body {
+        background-image: -webkit-linear-gradient(45deg, #0c0c0c, #0c0c0c);
+        background-image: -moz-linear-gradient(45deg, #0c0c0c, #0c0c0c);
+        background-image: -o-linear-gradient(45deg, #0c0c0c, #0c0c0c);
+        background-image: -ms-linear-gradient(45deg, #0c0c0c, #0c0c0c);
+        background-image: linear-gradient(45deg, #0c0c0c, #0c0c0c);
+    }
+
+    :root {
+        font-family: "Inter";
+    }
+
+    body #topbar #search-form-container #search-dropdown {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 12px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+        margin-top: 5px;
+    }
+
+    .sidebar .episodes .episodes-list li .episode-details .footer .watched {
+        background-color: #7b5bf54d;
+        color: #8e72f9;
+    }
+
+    #window-controls #user-panel {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 12px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+    
+
+    html {
+        background-color: #0c0c11 !important;
+        font-size: var(--text-size);
+        font-family: "Inter";
+        font-size: 13.5px;
+    }
+
+    .sidebar {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 12px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+        bottom: 5rem;
+        right: 3rem;
+    }
+
+    body #topbar #search-form-container #search-bar {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 10px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    #board .board-container li .board-row li {
+        height: calc(8.3rem / (27 / 40));
+        width: 22rem;
+        border-radius: 12px;
+    }
+
+    .heading .heading-title {
+        font-weight: 700;
+        font-size: 1.7rem;
+    }
+
+    .heading-button {
+        font-size: 0rem;
+        height: 0rem;
+    }
+
+    .items .notification.in-cinema {
+        width: 40%;
+    }
+
+    .streams-container .streams .stream .stream-content .name .progress .bar {
+        background-color: white;
+    }
+
+    input, select {
+        font-family: "Inter";
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.125);
+    }
+
+    .settings-container .settings-panel .ro-copy-text-container button {
+        border-radius: 9px;
+        padding-left: -6rem;
+    }
+
+
+
+    .button-b, .button-s {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.411);
+        border-radius: 10px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.01);
+        font-family: "Inter";
+    }
+
+    .settings-container .sections a {
+        padding: 0 4em;
+    }
+
+    select[name="addon"][ng-model="selected.addon"] {
+        display: none;
+    }
+
+    svg[icon="caret-down"].icon {
+        display: none;
+    }
+
+    input {
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.125);
+    }
+
+    #detail .background .overlay {
+        backdrop-filter: blur(20px);
+        background-color: rgba(0, 0, 0, 0.336);
+    }
+
+    .sidebar .episodes .episodes-list li.playing {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 12px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    #discover .info-box .content .actions .button.play .label {
+        margin-left: 30px;
+    }
+    
+    #discover .info-box .content .actions .button.play .icon-container {
+        display: none;
+    }
+
+    /* YOUTUBE */
+    .items board-row show-title square {
+        visibility: hidden;
+    }
+
+    input[type=checkbox]:checked {
+        background-color: #7b5bf5;
+        -webkit-box-shadow: 0 0 2rem 0 rgba(0,0,0,0.4);
+        box-shadow: 0 0 2rem 0 rgba(0,0,0,0.4);
+    }
+
+    #toast-container .toast.toast-error {
+        background-color: #0c0c0cd0;
+        backdrop-filter: blur(19px);
+        border-color: #201d27;
+        border-width: 1px; 
+        box-shadow: 10px, black;
+        border-style: solid;
+    }
+
+    .addon .buttons .configure {
+        background-color: #7b5bf5;
+    }
+
+    .addon .buttons .install  {
+        background-color: #7b5bf5;
+    }
+
+    #toast-container .toast {
+        background-color: #0c0c0cd0;
+        backdrop-filter: blur(19px);
+        border-color: #201d27;
+        border-width: 1px; 
+        box-shadow: 10px, black;
+        border-style: solid;
+        -webkit-box-shadow: 0 0 2rem 0 rgba(0,0,0,0.4);
+        box-shadow: 0 0 2rem 0 rgba(0,0,0,0.4);
+    }
+    
+    /* in cinema */
+    .items .notification.in-cinema {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    
+    .li .ng {
+        display: none;
+    }
+
+
+    /* play button */
+    #board .board-container li .board-row.recent-board li .thumb .play {
+        backdrop-filter: blur(10px);
+        box-shadow: none;
+    }
+
+    #board .board-container li .board-row.recent-board li:hover .thumb .play, #board .board-container li .board-row.recent-board li:focus .thumb .play {
+        color: #14141450;
+        background-color: #14141450;
+    }
+
+    /* remove button for items */
+    #board .notif .close, #board .resume .close {
+        background-color: rgba(12,12,17,0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    /* progress */
+    .items .progress {
+        backdrop-filter: blur(5px);
+    }
+
+    #streamReport {
+        background-color: black;
+    }
+
+    body #navbar .tab.selected .icon {
+        color: white;
+    }
+
+    .segments li.selected {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    #library .items li {
+        transition: transform .2s;
+    }
+
+    #library .items li:hover {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        transform: scale(1.03);
+    }
+
+
+    #discover .content .items li:hover {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        transform: scale(1.03);
+    }
+
+    #discover .content .items li {
+        transition: transform .2s;
+    }
+
+    #board .board-container li .board-row li:hover {
+        transform: scale(1.03);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #board .board-container li .board-row li:focus {
+        transform: scale(1.03);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #board .board-container li .board-row li {
+        transition: transform .2s;
+    }
+
+    #board .board-container li .board-row li:hover {
+        transform: scale(1.03);
+    }
+
+    .items .thumb > img {
+        cursor: pointer;
+    }
+
+    /* Removing all the borders that show up on hover/focus */
+
+    #discover .content .items li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #discover .info-box .content .details .section .links .link:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #discover .info-box .content .actions .button:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #library .items li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #series-calendar .selectMonth ul li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none; 
+    }
+
+    #series-calendar ul.month li.day:focus {
+        -webkit-box-shadow: none; 
+        box-shadow: none;
+    }
+
+    #board .board-container li .board-row.board-notif .board-explanation {
+        background: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none
+    }
+
+    .settings-container .sections a:focus {
+        box-shadow: none;
+    }
+
+    .settings-container .settings-panel section .category .setting .shortcut-keys:focus {
+        box-shadow: none;
+    }
+
+    .settings-container .settings-panel a:focus {
+        box-shadow: none;
+    }
+
+    .sidebar .episodes .episodes-list li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    select:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .custom-select:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .segments li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    input[type=checkbox]:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .sidebar .episodes .episodes-list li:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .sidebar .details .section .links .link:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .streams-container .streams .stream:focus {
+        box-shadow: none;
+    }
+
+    .binge-group .buttons .button:focus {
+        box-shadow: none;
+    }
+
+    #detail .content .details .section .links .link:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #addonPromptModal .buttons .button:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #addonsCatalog .options .addon-search:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .addon:focus {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .addon .buttons .remove:hover {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    .button-b:hover:not([disabled]),
+    .button-s:hover:not([disabled]) {
+        background-color: rgb(10, 10, 10);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    } 
+
+    .button-b:focus:not([disabled]),
+    .button-s:focus:not([disabled]) {
+        background-color: rgb(10, 10, 10);
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #detail .content .action-buttons .button-b:hover {
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    .settings-container .settings-panel .ro-copy-text-container input {
+        border-radius: 9px;
+    }
+
+    select option {
+        background-color: #1a1a1a; 
+        text-align: left;
+        color: white;
+    }
+
+    #controlbar .popup {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 10px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    #volumeControl #volumeSlider .nipple {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(255, 255, 255, 0.74);
+        border-radius: 10px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+    
+    #sidebar-handle {
+        display: none;
+    }
+
+    #volumeControl #volumeSlider .scale-visual {
+        background: #ffffff69;
+    }
+
+    [type='range']:focus::-webkit-slider-runnable-track {
+        background: #dcdcdc
+    }
+
+    [type='range']::-webkit-slider-runnable-track {
+        cursor: pointer;
+        height: .65rem;
+        width: 100%;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        -webkit-transition: all 0.2s ease;
+        -moz-transition: all 0.2s ease;
+        -o-transition: all 0.2s ease;
+        -ms-transition: all 0.2s ease;
+        transition: all 0.2s ease;
+        background: #ffffff75;
+        border: 0 solid transparent;
+        border-radius: .65rem
+    }
+
+    [type='range']::-webkit-slider-thumb {
+        background: #ffffff;
+        border-radius: 10px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    #streamReport {
+        backdrop-filter: blur(60px) saturate(210%);
+        -webkit-backdrop-filter: blur(60px) saturate(210%);
+        background-color: rgba(17, 17, 17, 0.74);
+        border-radius: 12px;
+        border: .5px solid rgba(0, 0, 0, .2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 8px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    #subtitleMenu ul.listing li:not(.separator).selected:after, #dubMenu ul.listing li:not(.separator).selected:after, #playbackSpeedMenu ul.listing li:not(.separator).selected:after, #castingControl ul.listing li:not(.separator).selected:after {
+        background-color: #7b5bf5;
+    }
+
+    #play-progress-text {
+        font-family: "SF Mono Light";
+    }
+
+    .settings-container .settings-panel section .category .setting .shortcut-keys kbd {
+        font-family: "SF Mono Light";
+    }
+
+    /* fxy code */
+
+    #board .board-container li .board-row li {
+        height: calc(12.3rem / (27 / 40));
+        width: 30rem;
+        border-radius: 12px;
+    }
+
+    #board .board-container li .board-row li .info {
+        z-index: 1;
+        position: absolute;
+        height: 2.8531rem;
+        bottom: calc(-2.5rem + -1rem);
+        left: 0;
+        right: 123;
+        padding-left: 5px;
+        cursor: pointer;
+    }
+
+    #board .board-container li .board-row li .info .title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: rgba(255,255,255,0.9);
+        text-align: start;
+        margin-bottom: 0.25rem;
+        -o-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .heading .heading-title {
+        font-weight: 700;
+        font-size: 1.7rem;
+    }
+
+    #discover .content .items li {
+        height: calc(17.3rem / (27 / 40));
+        width: 25.3rem;
+        border-radius: 12px;
+    }
+
+    .heading-button {
+        font-size: 0rem;
+        height: 0rem;
+    }
+
+    .items .notification.in-cinema {
+        width: 8rem;
+    }
+
+    #discover .info-box {
+        -webkit-box-flex: 1;
+        -moz-box-flex: 1;
+        -o-box-flex: 1;
+        box-flex: 1;
+        -webkit-flex: 0 0 27rem;
+        -ms-flex: 0 0 27rem;
+        /* flex: 0 0 19rem; */
+        position: fixed;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: box;
+        display: flex;
+        /* -webkit-box-orient: vertical; */
+        -moz-box-orient: vertical;
+        -o-box-orient: vertical;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-pack: justify;
+        -moz-box-pack: justify;
+        -o-box-pack: justify;
+        -ms-flex-pack: justify;
+        -webkit-justify-content: space-between;
+        justify-content: space-around;
+        width: 100%;
+        margin-left: 1rem;
+        border-radius: 0 0 0 0;
+        overflow: hidden;
+        top: 81%;
+    }
+
+    #discover .info-box .bkg {
+        opacity: 1;
+        left: -50px;
+    }
+
+    #discover .info-box .content .details {
+        flex-direction: unset;
+        overflow-y: auto;
+        padding: 0 2.5rem;
+        padding-top: 2rem;
+        display: inline-flex;
+        position: relative;
+    }
+
+    #discover .info-box .content .details .info li {
+        font-size: 1.1rem;
+        font-weight: 600;
+        -webkit-align-items: center;
+        display: inline-flex;
+    }
+
+    #discover .info-box .content .details .info {
+        display: grid;
+        display: -moz-box;
+        /* display: -webkit-flex; */
+        display: -ms-flexbox;
+        display: box;
+        /* display: flex; */
+        -webkit-box-orient: horizontal;
+        -moz-box-orient: horizontal;
+        -o-box-orient: horizontal;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        /* flex-direction: row; */
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        -o-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: start;
+        align-items: start;
+        -webkit-box-pack: start;
+        -moz-box-pack: justify;
+        -o-box-pack: justify;
+        -ms-flex-pack: justify;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        height: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    #discover .content .items {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fill,minmax(16rem, 20rem));
+        gap: 6.3rem;
+        -ms-flex-line-pack: start;
+        -webkit-align-content: flex-start;
+        align-content: flex-start;
+        padding: 0.5rem 1rem 1rem 1rem;
+        overflow-y: auto;
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000;
+        -moz-perspective: 1000;
+        -ms-perspective: 1000;
+        perspective: 1000;
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -o-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    #discover .info-box .content .details .logo {
+        -webkit-box-flex: 0;
+        -moz-box-flex: 0;
+        -o-box-flex: 0;
+        box-flex: 0;
+        -webkit-flex: none;
+        -ms-flex: none;
+        flex: none;
+        position: relative;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: box;
+        display: flex;
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        -o-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        -o-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        height: 9rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    /* last fxy code */
