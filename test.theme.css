@@ -724,4 +724,8 @@
         margin-bottom: 1.5rem;
         overflow: hidden;
     }
+
+    #board .board-container > li {
+        margin-bottom: 0rem;
+    }
     /* last fxy code */
