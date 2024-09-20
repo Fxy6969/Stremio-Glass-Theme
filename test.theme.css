@@ -131,6 +131,7 @@
     .segments li.selected {
         background-color: var(--bg-hover-color);
     }
+
     input,
     select {
         font-family: "Inter";
@@ -637,7 +638,7 @@ select option {
 #controlbar .popup {
     backdrop-filter: blur(60px) saturate(210%);
     -webkit-backdrop-filter: blur(60px) saturate(210%);
-    background-color: var(--bg-color);
+    background-color: rgba(17, 17, 17, 0.74);
     border-radius: 10px;
     border: 0.5px solid rgba(0, 0, 0, 0.2);
     box-shadow: var(--box-shadow);
