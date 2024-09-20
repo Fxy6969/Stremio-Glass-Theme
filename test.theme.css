@@ -127,6 +127,22 @@
     #board .carousel-button .arrow-middle {
         color: var(--text-color);
     }
+
+    .segments li.selected {
+        background-color: var(--bg-hover-color);
+    }
+    input,
+    select {
+        font-family: "Inter";
+        color: var(--text-color);
+        border-radius: 8px;
+        background-color: rgba(0 0 0 / 5%);
+        border: 1px solid rgb(0 0 0 / 13%);
+    }
+
+    .empty-library ul li .label {
+        color: var(--text-color);
+    }
 }
 
 @font-face {
