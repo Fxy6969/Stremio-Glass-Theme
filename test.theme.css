@@ -135,14 +135,40 @@
     input,
     select {
         font-family: "Inter";
-        color: var(--text-color);
+        color: #fff;
         border-radius: 8px;
-        background-color: rgba(0 0 0 / 5%);
-        border: 1px solid rgb(0 0 0 / 13%);
+    }
+
+    div[title="Watch Trailer"].button-b {
+        color: #fff;
+        background-color: rgba(17, 17, 17, 0.411);
+    }
+
+    div[title="Add to Library"].button-b {
+        color: #fff;
+        background-color: rgba(17, 17, 17, 0.411);
+    }
+
+    svg[icon="trailer"].icon {
+        color: #fff;
+    }
+
+    svg[icon="add-to-library"].icon {
+        color: #fff;
     }
 
     .empty-library ul li .label {
         color: var(--text-color);
+    }
+
+    .settings-container .settings-panel section .category .setting input,
+    .settings-container .settings-panel section .category .setting select,
+    .settings-container .settings-panel section .category .setting .button-s {
+        color: var(--text-color);
+        background-color: var(--bg-hover-color);
+        cursor: pointer;
+        border-radius: 12px;
+        border: 0.5px solid rgba(0, 0, 0, 0.2);
     }
 }
 
@@ -152,6 +178,10 @@
         format("woff2");
     font-weight: lighter;
     font-style: normal;
+}
+
+body #topbar .logo img {
+    filter: grayscale(1);
 }
 
 @font-face {
