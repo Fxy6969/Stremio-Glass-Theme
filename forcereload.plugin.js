@@ -2,7 +2,7 @@
  * @name ReloadOnShortcut
  * @description Reloads the Electron window when CTRL+SHIFT+R is pressed.
  * @version 1.0.1
- * @author YourName
+ * @author Moerat
  * @updateUrl https://raw.githubusercontent.com/YourUsername/YourRepo/main/ReloadOnShortcut.plugin.js
  */
 
