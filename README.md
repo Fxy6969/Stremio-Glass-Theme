@@ -47,4 +47,4 @@ This is currently our very first Theme we have worked on, so expect it to be ver
 
 ---
 
-Made with ❤️ for the Streamio community
+Made with ❤️ for the Streamio community by Fxy/Moerat
