@@ -40,9 +40,9 @@ This theme is in active development. You may encounter bugs or unexpected behavi
 
 Contributions are welcome! If you'd like to improve Streamio-Glass, please fork the repository and submit a pull request.
 
-## License
+## Disclamer
 
-[MIT License](LICENSE)
+This project is not affiliated in any way with Stremio.
 
 ---
 
