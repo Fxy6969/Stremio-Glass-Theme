@@ -43,6 +43,7 @@ Contributions are welcome! If you'd like to improve Streamio-Glass, please fork 
 ## Disclamer
 
 This project is not affiliated in any way with Stremio.
+This is currently our very first Theme we have worked on, so expect it to be very poorly coded.
 
 ---
 
