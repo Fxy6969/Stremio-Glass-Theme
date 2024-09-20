@@ -1,8 +1,8 @@
-# Streamio-Glass
+# Stremio-Glass
 
-Streamio-Glass is a custom theme for [Streamio Enhanced](https://github.com/REVENGE977/stremio-enhanced-community)
+Streamio-Glass is a custom theme for [Stremio Enhanced](https://github.com/REVENGE977/stremio-enhanced-community)
 
-![Streamio-Glass Theme Preview](https://github.com/user-attachments/assets/f2d69014-6dde-4bd8-ae97-966b546f5ede)
+![Stremio-Glass Theme Preview](https://github.com/user-attachments/assets/f2d69014-6dde-4bd8-ae97-966b546f5ede)
 
 ## Features
 
@@ -12,7 +12,7 @@ Streamio-Glass is a custom theme for [Streamio Enhanced](https://github.com/REVE
 
 ## Installation
 
-1. Download the latest release from the [Releases](https://github.com/Fxy6969/Streamio-Glass-Theme/releases/tag/release) tab.
+1. Download the latest release from the [Releases](https://github.com/Fxy6969/Stremio-Glass-Theme/releases/tag/release) tab.
 2. Ensure you have the required plugins installed for Streamio Enhanced.
 3. Drag the downloaded files into your Streamio plugin/theme folder.
 
