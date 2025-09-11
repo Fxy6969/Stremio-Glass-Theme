@@ -1,71 +1,101 @@
-# Stremio-Glass Theme + Quality of Life Improvements
+# Modern Glass – Stremio Theme + QoL Enhancements  
 
-A modern, glass-like theme with powerful enhancements for [Stremio Enhanced](https://github.com/REVENGE977/stremio-enhanced-community). This theme combines beautiful aesthetics with practical improvements to enhance your Stremio experience.
+![Modern Glass Banner](https://github.com/user-attachments/assets/fd9d1d76-6c59-47fb-acfb-75433ba382bc)
 
-![Stremio-Glass Theme + Plugins Preview](https://github.com/user-attachments/assets/d84a6f4e-378d-42bb-a84a-0f4a4a292b2c)
+[![Reddit Community](https://img.shields.io/reddit/subreddit-subscribers/StremioMods?style=social&logo=reddit)](https://www.reddit.com/r/StremioMods/)  
+[![Join Discord](https://img.shields.io/badge/Discord-Join%20Us-5865F2?style=flat&logo=discord&logoColor=white)](#) *(Coming soon)*  
 
-## Features
-
-### Theme Highlights
-- 🌟 Glass-like transparent interface for a modern look
-- 🎨 Dual theme support (Dark and Light modes)
-- ✨ Enhanced visual aesthetics throughout the interface
-- 🖼️ High-quality cover art display
-
-### Quality of Life Plugins
-Our custom plugins enhance your Stremio experience:
-
-| Plugin | Description |
-|--------|-------------|
-| `bettertitle.plugin.js` | Displays IMDb ratings directly in titles |
-| `coverfix.plugin.js` | Provides higher quality covers and supports new wide cover format for series/movies |
-| `forcereload.plugin.js` | Adds Ctrl + Shift + R shortcut for quick app reload |
-| `mp4only.plugin.js` | Filters to show only MP4 streams (fixes web client audio issues with MKV) |
-| `tags.plugin.js` | Adds useful tags like "Continue Watching" to covers |
-| `theme.plugin.js` | Implements dark/light theme switching functionality |
-
-## Screenshots
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/daf10a85-b69c-4c40-b169-177fc307e62b" alt="Screenshot 1" width="45%">
-  <img src="https://github.com/user-attachments/assets/611dabd1-1ab3-4d96-90c8-a0ea6e6867f4" alt="Screenshot 2" width="45%">
-</div>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/6a677b8c-4726-4f64-9df8-e4538fad5e47" alt="Screenshot 3" width="45%">
-</div>
-
-## Installation
-
-1. Download the latest release from the [Releases](https://github.com/Fxy6969/Stremio-Glass-Theme/releases/tag/release) page
-2. Install [Stremio Enhanced](https://github.com/REVENGE977/stremio-enhanced-community) if you haven't already
-3. Drag the downloaded files into your Stremio plugin/theme folder
-4. Restart Stremio to apply changes
-
-## Requirements
-
-- [Stremio Enhanced](https://github.com/REVENGE977/stremio-enhanced-community) installation
-- All provided plugins (included in the release package)
-
-## Known Issues
-
-This theme is actively maintained and under development. You may encounter occasional bugs or unexpected behavior. Please report any issues you find in the [Issues](https://github.com/Fxy6969/Stremio-Glass-Theme/issues) tab.
-
-## Contributing
-
-We welcome contributions! If you'd like to improve Stremio-Glass:
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Submit a pull request
-
-## Disclaimer
-
-- This project is not officially affiliated with Stremio
-- This is our first theme project - while functional, the code may not be optimally structured
-- We appreciate feedback and suggestions for improvement
+**Modern Glass** is a complete visual overhaul for Stremio Enhanced.  
+It brings a sleek, glass-like aesthetic combined with powerful quality-of-life improvements for a truly modern streaming experience.  
 
 ---
 
-Made with ❤️ for the Stremio community by Fxy/Moerat
+## ✨ Features  
+
+### 🎨 Theme Highlights  
+- 🌟 **Glass-like transparent interface** for a clean, modern look   
+- 🖼️ **High-quality, wide cover art** for movies & series  
+- 🧩 **Refined UI layout** – better spacing, typography, and animations  
+
+---
+
+### 🔧 Quality of Life Plugins  
+
+| Plugin | Description |
+|-------|-------------|
+| **horizontal-navigation.plugin.js** | Moves the vertical navigation bar to a **horizontal** position |
+| **enhancedcovers.plugin.js** | Widens and improves cover images in the library |
+| **enhancedvideoplayer.plugin.js** | Adds extra features & a redesigned look to the video player |
+| **enhancedtitlebar.plugin.js** | Displays additional information in the title bar |
+| **dynamichero.plugin.js** | Netflix-style **rotating hero banner** on the homepage |
+| **moveprogressbar.plugin.js** | Moves the watch progress bar inside the title container |
+| **Picture In Picture** | Updated and brought back the Picture In Picture feature |
+
+---
+
+## 📷 Screenshots  
+
+| Home Page | Titles | Video Player |
+|----------|-------------|-------------|
+| ![Home Page](https://github.com/user-attachments/assets/fd9d1d76-6c59-47fb-acfb-75433ba382bc) | ![Titles](https://github.com/user-attachments/assets/b056a731-3a76-44c9-a316-ea212e1ac88a) | ![Video Player](https://github.com/user-attachments/assets/eab96818-e4cf-488f-b9f9-bc16dfbdd7e2) |
+
+---
+
+## 📥 Installation  
+
+You have **two ways** to install Modern Glass:  
+
+1. **Recommended:**  
+   - Open the **Stremio Enhanced Marketplace** inside Stremio  
+   - Search for **Modern Glass** and install it directly (no manual setup needed)  
+
+2. **Manual Installation:**  
+   - Download the latest release from the [Releases Page](#)  
+   - Install Stremio Enhanced (required)  
+   - Drag and drop the downloaded files into your Stremio plugin/theme folder  
+   - Restart Stremio to apply changes  
+
+---
+
+## 🖥️ Requirements  
+
+- Stremio Enhanced installation  
+- All included plugins (bundled in the release package)  
+
+---
+
+## 🧪 Known Issues  
+
+Modern Glass is actively maintained and evolving.  
+You may encounter occasional bugs or unexpected behavior — please report them via the **Issues tab**.  
+
+---
+
+## 🌐 Join the Community  
+
+Want to discuss Stremio mods, share your own plugins, get coding help, or just hang out with other creators?  
+Join our growing community:  
+
+- **Reddit:** [r/StremioMods](https://www.reddit.com/r/StremioMods/)  
+- **Discord:** *(Coming soon – we’ll add the invite link here!)*  
+
+This community is open to **everyone** — plugin creators, theme designers, and users who want to learn, share, and improve the Stremio experience together.  
+
+---
+
+## 🤝 Contributing  
+
+We welcome community contributions!  
+
+1. Fork the repo  
+2. Create a feature branch  
+3. Commit your changes  
+4. Push and submit a PR  
+
+---
+
+## ⚠️ Disclaimer  
+
+- Not officially affiliated with Stremio  
+- This is an ongoing project – code quality and structure will improve over time  
+- Feedback and suggestions are highly appreciated ❤️  
