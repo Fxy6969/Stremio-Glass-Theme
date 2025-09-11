@@ -45,11 +45,12 @@ It brings a sleek, glass-like aesthetic combined with powerful quality-of-life i
 
 You have **two ways** to install Modern Glass:  
 
-1. **Recommended:**  
+1. **Via Stremio Enhanced Marketplace (Recommended):**  
    - Open the **Stremio Enhanced Marketplace** inside Stremio  
-   - Search for **Modern Glass** and install it directly (no manual setup needed)  
+   - Search for **Modern Glass**  
+   - Install it directly (manual)  
 
-2. **Manual Installation:**  
+2. **Direct Download / Manual Installation:**  
    - Download the latest release from the [Releases Page](#)  
    - Install Stremio Enhanced (required)  
    - Drag and drop the downloaded files into your Stremio plugin/theme folder  
