@@ -37,7 +37,7 @@ It brings a sleek, glass-like aesthetic combined with powerful quality-of-life i
 
 | Home Page | Titles | Video Player |
 |----------|-------------|-------------|
-| ![Home Page](https://github.com/user-attachments/assets/fd9d1d76-6c59-47fb-acfb-75433ba382bc) | ![Titles](https://github.com/user-attachments/assets/b056a731-3a76-44c9-a316-ea212e1ac88a) | ![Video Player](https://github.com/user-attachments/assets/eab96818-e4cf-488f-b9f9-bc16dfbdd7e2) |
+| ![Home Page](https://github.com/user-attachments/assets/fd9d1d76-6c59-47fb-acfb-75433ba382bc) | ![Titles](https://github.com/user-attachments/assets/fbc8a242-f89a-4fe7-a074-c9f15b517873) | ![Video Player](https://github.com/user-attachments/assets/eab96818-e4cf-488f-b9f9-bc16dfbdd7e2) |
 
 ---
 
