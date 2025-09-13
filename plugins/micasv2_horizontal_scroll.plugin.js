@@ -1,16 +1,16 @@
 /**
- * @name Horizontal Scroll V2
- * @description Horizontal scroll with drag, wheel and keyboard support
- * @version 1.0.4
+ * @name Horizontal Scroll 
+ * @description Horizontal scroll with drag, wheel, and keyboard
+ * @version 1.0.4 
  * @author Micas
  */
 
 (() => {
-    const GRID_FLAG = 'enhanced-horizontal-grid-v2';
+    const GRID_FLAG = 'enhanced-horizontal-grid-v3';
     const WHEEL_SPEED = 1.8;
     const DRAG_SPEED = 1.2;
-    const KEY_SCROLL = 0.4;
-    const SCROLL_EASE = 0.25; // ligeiramente mais responsivo
+    const KEY_SCROLL_RATIO = 0.5; // % da largura do container
+    const SCROLL_EASE = 0.2;
 
     function isLikelyGrid(el) {
         return el?.nodeType === 1 &&
@@ -30,26 +30,25 @@
         grid.classList.add('enhanced-horizontal-scroll');
 
         let targetScroll = grid.scrollLeft;
-        let rafId = null;
+        let isAnimating = false;
         let isDown = false;
         let middleMode = false;
         let startX = 0;
         let scrollLeft = 0;
 
         const animate = () => {
+            if (!isAnimating) return;
             const diff = targetScroll - grid.scrollLeft;
-            if (Math.abs(diff) < 0.5) {
-                grid.scrollLeft = targetScroll;
-                rafId = null;
-                return;
+            if (Math.abs(diff) < 0.5) { 
+                grid.scrollLeft = targetScroll; 
+                isAnimating = false; 
+                return; 
             }
             grid.scrollLeft += diff * SCROLL_EASE;
-            rafId = requestAnimationFrame(animate);
+            requestAnimationFrame(animate);
         };
 
-        const startAnimation = () => {
-            if (rafId == null) rafId = requestAnimationFrame(animate);
-        };
+        const startAnimation = () => { if (!isAnimating) { isAnimating = true; animate(); } };
 
         const applyMode = () => {
             const carousel = computeIsCarousel(grid);
@@ -57,6 +56,7 @@
             if (!grid.style.gap) grid.style.gap = '12px';
             if (!grid.style.padding) grid.style.padding = '10px 12px';
             grid.style.webkitOverflowScrolling = 'touch';
+
             if (carousel) {
                 grid.style.display = 'flex';
                 grid.style.flexWrap = 'nowrap';
@@ -77,30 +77,29 @@
             const carouselNow = computeIsCarousel(grid);
             const shouldConvert = carouselNow || middleMode;
             if (!shouldConvert || e.shiftKey) return;
+
             if (middleMode || Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                 e.preventDefault();
-                targetScroll = grid.scrollLeft + e.deltaY * WHEEL_SPEED;
+                targetScroll += e.deltaY * WHEEL_SPEED;
                 startAnimation();
             }
         }, { passive: false });
 
         // AUXCLICK: prevenir autoscroll middle-button
-        grid.addEventListener('auxclick', (e) => {
-            if (e.button === 1) e.preventDefault();
-        });
+        grid.addEventListener('auxclick', (e) => { if (e.button === 1) e.preventDefault(); });
 
-        // POINTERDOWN: drag
+        // POINTERDOWN: drag com qualquer botão do mouse
         grid.addEventListener('pointerdown', (e) => {
             if (e.button === 1) middleMode = true;
+
             isDown = true;
             grid.classList.add('dragging');
             startX = e.clientX;
-            scrollLeft = grid.scrollLeft;
-            targetScroll = scrollLeft;
+            scrollLeft = targetScroll = grid.scrollLeft;
             e.preventDefault();
         });
 
-        // POINTERMOVE
+        // POINTERMOVE: drag horizontal sempre ativo
         window.addEventListener('pointermove', (e) => {
             if (!isDown) return;
             const x = e.clientX;
@@ -116,18 +115,31 @@
         window.addEventListener('pointerup', clearPointer);
         grid.addEventListener('pointerleave', clearPointer);
 
-        // TECLADO
+        // TECLADO: sempre ativado se grid tem scroll horizontal
         grid.setAttribute('tabindex', '0');
         grid.addEventListener('keydown', (e) => {
-            if (!computeIsCarousel(grid)) return;
-            if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                targetScroll = grid.scrollLeft + grid.clientWidth * KEY_SCROLL;
-                startAnimation();
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                targetScroll = grid.scrollLeft - grid.clientWidth * KEY_SCROLL;
-                startAnimation();
+            const width = grid.clientWidth * KEY_SCROLL_RATIO;
+            switch (e.key) {
+                case 'ArrowRight':
+                    e.preventDefault();
+                    targetScroll += width;
+                    startAnimation();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    targetScroll -= width;
+                    startAnimation();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    targetScroll = 0;
+                    startAnimation();
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    targetScroll = grid.scrollWidth;
+                    startAnimation();
+                    break;
             }
         });
 
@@ -145,7 +157,7 @@
 
         const mo = new MutationObserver(() => {
             applyMode();
-            targetScroll = grid.scrollLeft;
+            targetScroll = Math.max(0, Math.min(grid.scrollWidth, grid.scrollLeft));
         });
         mo.observe(grid, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
 
@@ -155,12 +167,8 @@
     const scanAndEnable = () => {
         document.querySelectorAll(
             '[class*="catalog-grid"], [class*="items-container"], [class*="collection"], [class*="grid"], [class*="catalog-list"], [role="list"]'
-        ).forEach(c => {
-            try {
-                if (isLikelyGrid(c)) enableGrid(c);
-            } catch (e) {
-                console.error("Grid init error:", e);
-            }
+        ).forEach(c => { 
+            try { if (isLikelyGrid(c)) enableGrid(c); } catch (e) { console.error(e); }
         });
     };
 
@@ -169,3 +177,6 @@
 
     scanAndEnable();
 })();
+
+})();
+
