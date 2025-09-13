@@ -25,14 +25,17 @@
   --bg-hover-color: rgba(12, 12, 12, 0.05);
   --bg-input-color: rgba(157, 157, 157, 0.74);
 
-  --backdrop-filter: blur(5px) saturate(210%) !important;
-  --backdrop-filter2: blur(5px) saturate(210%) !important;
-
   --border-radius: 12px;
 
   --box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2),
   0 8px 40px rgba(0, 0, 0, 0.55);
 }
+
+/* glass effect: */
+/*     background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important; */
 
 html body {
   background: var(--background) !important;
@@ -244,9 +247,8 @@ html body {
   transition: padding 0.2s ease-out !important;
 }
 
-.meta-item-container-Tj0Ib.poster-shape-poster-MEhNx .poster-container-qkw48 {
-    padding-top: calc(40% * var(--poster-shape-ratio));
-    padding-right: 420px;
+.meta-row-container-xtlB1 .meta-items-container-qcuUA .meta-item-QFHCh.poster-shape-poster-LKBza {
+    flex: calc(1 / var(--poster-shape-ratio)) 0 250px !important;
 }
 
 /* account dropdown */
@@ -273,15 +275,6 @@ html body {
 .menu-container-B6cqK {
   background-color: transparent !important;
   box-shadow: none !important;
-}
-
-/*  dropdown */
-
-.dropdown-MWaxp {
-    background-color: #00000093;
-    backdrop-filter: var(--backdrop-filter2);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
 }
 
 .modal-container-OuxEF .modal-dialog-container-DZMKq {
@@ -526,20 +519,6 @@ html body {
   padding: 0.2rem;
 }
 
-@media only screen and (max-width: 800px) {
-    .discover-container-L6OGL .discover-content-CRsRg .catalog-container-VNK_T .meta-items-container-n8vNz {
-        grid-template-columns: repeat(4, 1fr);
-        margin-right: 0;
-    }
-}
-
-@media only screen and (max-width: 1000px) {
-    .discover-container-L6OGL .discover-content-CRsRg .catalog-container-VNK_T .meta-items-container-n8vNz {
-        grid-template-columns: repeat(1, 1fr);
-        margin-right: 2px;
-    }
-} 
-
 .library-container-zM_bj .library-content-PgX4O .selectable-inputs-container-hR3or {
     margin-top: 4.3rem !important;
 }
@@ -555,24 +534,6 @@ html body {
 
 .settings-container-_g1tS .settings-content-co5eU .sections-container-ZaZpD {
     padding: 5rem 3rem !important;
-}
-
-@media only screen and (max-width: 1300px) {
-    .library-container-zM_bj .library-content-PgX4O .meta-items-container-IKrND {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media only screen and (max-width: 1000px) {
-    .library-container-zM_bj .library-content-PgX4O .meta-items-container-IKrND {
-        grid-template-columns: repeat(1, 1fr);
-    }
-}
-
-@media only screen and (max-width: 2200px) {
-    .library-container-zM_bj .library-content-PgX4O .meta-items-container-IKrND {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 .discover-container-L6OGL .discover-content-CRsRg .catalog-container-VNK_T .meta-items-container-n8vNz {
@@ -1016,11 +977,17 @@ body.ghost-clicking #heroLoadingScreen {
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
+.meta-item-container-Tj0Ib {
+    overflow: hidden;
+}
+
 .custom-icon {
     width: 1.9rem !important;
     height: 1.6rem !important;
 }
 
+/* SHIT CODE WARNING
+   TODO: Clean up this code cant rn cuz im lazy */
 .nav-menu-container-Pl25j, .nav-menu-container-Pl25j {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
@@ -1050,6 +1017,103 @@ body.ghost-clicking #heroLoadingScreen {
 }
 
 .meta-preview-container-o22hc .action-buttons-container-XbKVa .action-button-XIZa3 {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.chip-L3r9A.active-jnhyP {
+  background: rgba(70, 70, 70, 0.22) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: var(--backdrop-filter) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.addon-details-modal-container-aBFaQ .cancel-button-zuUX6 {
+  background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    opacity: 1;
+}
+
+.modal-container-OuxEF .modal-dialog-container-DZMKq {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.meta-item-container-Tj0Ib .poster-container-qkw48 .watched-icon-layer-bi3DO {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.dropdown-MWaxp {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.search-bar-container-p4tSt {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.addons-container-ogGYu .addons-content-zhFBl .selectable-inputs-container-tUul1 .select-input-container-KqG8N {
+     background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.add-addon-modal-container-KR5ny .modal-dialog-content-Xgv7Z .addon-url-input-ucetZ:focus, .add-addon-modal-container-KR5ny .modal-dialog-content-Xgv7Z .addon-url-input-ucetZ:hover {
+     background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.option-vFOAS .content-P2T0i .button {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.multiselect-menu-qMdaj .multiselect-button-XXdgA {
+      background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 0.1px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.shortcut-container-iOrn9 kbd {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow: 0 8px 0px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.library-container-zM_bj .library-content-PgX4O .selectable-inputs-container-hR3or .select-input-container-H1VZ1 {
+    /* background-color: var(--overlay-color); */
+    flex-basis: 20rem;
+    flex-grow: 0;
+    flex-shrink: 1;
+    height: 3.2rem;
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: var(--backdrop-filter) !important;

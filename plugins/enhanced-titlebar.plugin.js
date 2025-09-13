@@ -22,7 +22,7 @@ function injectStyles() {
         .enhanced-title-bar {
             position: relative !important;
             padding: 5px 4px !important;
-            padding-right: 40px !important;
+            padding-right: 10px !important;
             overflow: hidden !important;
             max-width: 400px !important;
             transform: translateZ(0) !important;
@@ -240,7 +240,7 @@ async function enhanceTitleBar(titleBarElement) {
             const elements = createMetadataElements(metadata);
             elements.forEach((element, index) => {
                 metadataContainer.appendChild(element);
-                if (index < elements.length - 1) {
+                if (index < elements.length - 2) {
                     const separator = document.createElement('span');
                     separator.className = 'enhanced-separator';
                     separator.textContent = '•';
