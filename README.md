@@ -47,8 +47,8 @@ You have **two ways** to install Modern Glass:
 
 1. **Via Stremio Enhanced Marketplace (Recommended):**  
    - Open the **Stremio Enhanced Marketplace** inside Stremio  
-   - Search for **Modern Glass**  
-   - Install it directly (manual)  
+   - Search for **Modern Glass** and its Plugins Tagged with **Modern Glass**  
+   - Install it 
 
 2. **Direct Download / Manual Installation:**  
    - Download the latest release from the [Releases Page](#)  
