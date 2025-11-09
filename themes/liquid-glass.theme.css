@@ -34,7 +34,7 @@
 /* glass effect: */
 /*     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important; */
 
 html body {
@@ -227,7 +227,7 @@ html body {
     0 4px 16px rgba(0, 0, 0, 0.1) , 
     inset 0 1px 0 rgba(255, 255, 255, 0.15), 
     inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.04) !important;
   opacity: 1 !important;
   transform: translateY(0px) scale(1) !important;
@@ -261,6 +261,7 @@ html body {
 
 .nav-menu-container-Pl25j, .nav-menu-container-Pl25j {
   background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .label-container-XOyzm, .menu-container-B6cqK {
@@ -279,7 +280,7 @@ html body {
 
 .modal-container-OuxEF .modal-dialog-container-DZMKq {
     background-color: #00000093;
-    backdrop-filter: var(--backdrop-filter);
+    backdrop-filter: blur(8px);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
 }
@@ -296,7 +297,7 @@ html body {
     0 4px 16px rgba(0, 0, 0, 0.1) , 
     inset 0 1px 0 rgba(255, 255, 255, 0.15) , 
     inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.04) !important;
   opacity: 1 !important;
 }
@@ -487,7 +488,7 @@ html body {
   background: rgba(70, 70, 70, 0.22) !important;
   border-radius: 999px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  backdrop-filter: var(--backdrop-filter);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   opacity: 1 !important;
 }
@@ -496,7 +497,7 @@ html body {
   background: rgb(0 0 0 / 41%) !important;
   border-radius: 999px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  backdrop-filter: var(--backdrop-filter);
+  backdrop-filter: blur(8px);
   opacity: 1 !important;
 }
 
@@ -825,7 +826,7 @@ body.ghost-clicking #heroLoadingScreen {
     0 4px 16px rgba(0, 0, 0, 0.1) , 
     inset 0 1px 0 rgba(255, 255, 255, 0.15) , 
     inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.04) !important;
   opacity: 1 !important;
   transform: translateY(0px) scale(1) !important;
@@ -924,7 +925,7 @@ body.ghost-clicking #heroLoadingScreen {
     background: rgba(70, 70, 70, 0.22) !important;
     border-radius: 20px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
     margin-bottom: 15px !important;
     margin-top: 5px !important;
@@ -934,7 +935,7 @@ body.ghost-clicking #heroLoadingScreen {
 .slider-container-nJz5F .track-gItfW {
     background: rgba(255, 255, 255, 0.62) !important;
     border-radius: 999px !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
     flex: 1;
     height: var(--track-size);
@@ -965,7 +966,7 @@ body.ghost-clicking #heroLoadingScreen {
     background: rgba(70, 70, 70, 0.22) !important;
     border-radius: 999px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
@@ -1173,13 +1174,13 @@ body.ghost-clicking #heroLoadingScreen {
 .nav-menu-container-Pl25j, .nav-menu-container-Pl25j {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .meta-links-container-dh69_ .links-container-C8Mw9 .link-container-gHxPW {
   background: rgba(70, 70, 70, 0.22) !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.04) !important;
   box-shadow: 0 0px 0px rgba(0, 0, 0, 0.2), 0 0px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
 }
@@ -1187,35 +1188,35 @@ body.ghost-clicking #heroLoadingScreen {
 .meta-preview-container-o22hc .action-buttons-container-XbKVa .action-button-XIZa3.wide {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .meta-preview-container-o22hc .ratings-zUtHH {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .meta-preview-container-o22hc .action-buttons-container-XbKVa .action-button-XIZa3 {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .chip-L3r9A.active-jnhyP {
   background: rgba(70, 70, 70, 0.22) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .addon-details-modal-container-aBFaQ .cancel-button-zuUX6 {
   background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
     opacity: 1;
 }
@@ -1223,7 +1224,7 @@ body.ghost-clicking #heroLoadingScreen {
 .modal-container-OuxEF .modal-dialog-container-DZMKq {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
@@ -1249,7 +1250,7 @@ body.ghost-clicking #heroLoadingScreen {
   color: #fff !important;
   z-index: 50 !important;
   border-radius: inherit !important;
-  backdrop-filter: var(--backdrop-filter) !important;
+  backdrop-filter: blur(8px) !important;
   border: 0 !important;
   pointer-events: none !important; /* let clicks pass through if needed */
   opacity: 1 !important;
@@ -1303,56 +1304,60 @@ body.ghost-clicking #heroLoadingScreen {
 .dropdown-MWaxp {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.option-HcOSE{
+    backdrop-filter: blur(8px)!important;
 }
 
 .search-bar-container-p4tSt {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .addons-container-ogGYu .addons-content-zhFBl .selectable-inputs-container-tUul1 .select-input-container-KqG8N {
      background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .add-addon-modal-container-KR5ny .modal-dialog-content-Xgv7Z .addon-url-input-ucetZ:focus, .add-addon-modal-container-KR5ny .modal-dialog-content-Xgv7Z .addon-url-input-ucetZ:hover {
      background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .option-vFOAS .content-P2T0i .button {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .multiselect-menu-qMdaj .multiselect-button-XXdgA {
       background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 0.1px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 0px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
@@ -1364,7 +1369,7 @@ body.ghost-clicking #heroLoadingScreen {
     height: 3.2rem;
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
+    backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
