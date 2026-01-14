@@ -689,7 +689,21 @@
         currentIndex = 0;
         
         const heroHTML = createHeroHTML(heroTitles[0]);
+        
+        // Find the scrollable container and reset scroll position before inserting
+        const scrollableContainer = parent.closest('[class*="route-content"]') || 
+                                    parent.closest('[class*="board-container"]') ||
+                                    document.querySelector('.route-content') ||
+                                    document.querySelector('[class*="router-"]');
+        
         parent.insertAdjacentHTML("afterbegin", heroHTML);
+        
+        // Reset scroll to top after inserting hero to prevent scroll offset
+        if (scrollableContainer) {
+            scrollableContainer.scrollTop = 0;
+        }
+        // Also try window scroll in case it's the main document scrolling
+        window.scrollTo(0, 0);
         
         const insertedHero = parent.querySelector(".hero-container");
         if (insertedHero) {
@@ -847,11 +861,41 @@
         heroState.lastKnownHash = currentHash;
     }
 
+    function forceScrollToTop() {
+        // Force scroll to top on all possible containers
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        
+        // Find and reset all scrollable elements
+        document.querySelectorAll('*').forEach(el => {
+            if (el.scrollTop > 0 && el.scrollHeight > el.clientHeight) {
+                el.scrollTop = 0;
+            }
+        });
+    }
+
     window.addEventListener('hashchange', () => {
+        // If navigating to home/board, force scroll to top
+        const hash = window.location.hash;
+        if (hash === '' || hash === '#/' || hash === '#' || hash.includes('/board')) {
+            // Immediate scroll reset
+            forceScrollToTop();
+            // Delayed scroll resets to catch any async scroll changes
+            setTimeout(forceScrollToTop, 50);
+            setTimeout(forceScrollToTop, 150);
+            setTimeout(forceScrollToTop, 300);
+        }
         handleNavigation();
     });
 
     window.addEventListener('popstate', () => {
+        const hash = window.location.hash;
+        if (hash === '' || hash === '#/' || hash === '#' || hash.includes('/board')) {
+            forceScrollToTop();
+            setTimeout(forceScrollToTop, 50);
+            setTimeout(forceScrollToTop, 150);
+        }
         setTimeout(handleNavigation, 100);
     });
 
