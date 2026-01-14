@@ -3,6 +3,7 @@
  * @description Enriches movie and TV show details with TMDB data including enhanced cast, similar titles, collections, and ratings.
  * @version 1.0.0
  * @author MrBlu03
+ * @credits Inspired by the Stremio Neo project
  */
 
 class DataEnrichment {
