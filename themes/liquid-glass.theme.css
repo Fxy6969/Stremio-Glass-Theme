@@ -488,6 +488,8 @@ html body {
 
 .control-bar-container-xsWA7 .seek-bar-I7WeY {
     --thumb-size: 0.9rem;
+    margin-left: 11px;
+    margin-right: 11px;
 }
 
 /* title container */
@@ -1212,10 +1214,6 @@ body.ghost-clicking #heroLoadingScreen {
     height: var(--track-size);
     width: 100%;
     z-index: 0;
-}
-
-.seek-bar-container-JGGTa .slider-hBDOf {
-    margin: 0 !important;
 }
 
 .icon-qy6I6 {
