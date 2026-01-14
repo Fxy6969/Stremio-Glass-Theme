@@ -86,22 +86,65 @@ class EnhancedPlayer {
     
     splitAndMoveTitles() {
         const titleSelectors = [
+            // Meta/info elements that typically have the actual title
+            // Note: Be specific to avoid matching data-enrichment cast/crew names
+            ".meta-info-container > [class*='name']:not(.enhanced-cast-name):not(.enhanced-cast-character)",
+            ".meta-info-container > [class*='title']:not(.enhanced-section-header)",
+            "[class*='meta-preview'] > [class*='name']:not(.enhanced-cast-name)",
+            "[class*='meta-preview'] > [class*='title']:not(.enhanced-section-header)",
+            "[class*='side-drawer'] > [class*='name']:not(.enhanced-cast-name)",
+            "[class*='side-drawer'] .logo-X3hTV",
+            // Standard title locations
             "h2.title-DGh6h",
-            "#app > div.router-_65XU.routes-container > div:nth-child(3) > div.route-content > div > nav > h2", // Original selector
+            ".title-DGh6h",
+            "[class*='title-bar'] h2",
+            ".nav-bar-container h2",
+            "#app > div.router-_65XU.routes-container > div:nth-child(3) > div.route-content > div > nav > h2",
+            "nav h2[class*='title']",
         ];
+        
+        // Also try to get title from document title or URL
+        let fallbackTitle = null;
+        const docTitle = document.title;
+        if (docTitle && !docTitle.toLowerCase().includes('stremio') && docTitle.length > 3) {
+            fallbackTitle = docTitle.replace(' - Stremio', '').replace('Stremio - ', '').trim();
+        }
        
         let titleElement = null;
+        let titleText = null;
+        
         for (const selector of titleSelectors) {
-            titleElement = document.querySelector(selector);
-            if (titleElement && this.isValidTitle(titleElement.textContent)) {
-                break;
+            const elements = document.querySelectorAll(selector);
+            for (const el of elements) {
+                // Skip elements inside data enrichment sections
+                if (el.closest('.enhanced-cast-section') || 
+                    el.closest('.enhanced-similar-section') || 
+                    el.closest('.enhanced-collection-section') ||
+                    el.closest('.enhanced-content-wrapper') ||
+                    el.closest('[class*="enhanced-"]')) {
+                    continue;
+                }
+                
+                const text = el.textContent || el.alt || el.title;
+                if (text && this.isValidTitle(text)) {
+                    titleElement = el;
+                    titleText = text.trim();
+                    break;
+                }
             }
+            if (titleElement) break;
+        }
+        
+        // Use fallback title if no valid title found from elements
+        if (!titleText && fallbackTitle && this.isValidTitle(fallbackTitle)) {
+            titleText = fallbackTitle;
         }
        
         const containerSelectors = [
-            "#app > div.router-_65XU.routes-container > div:nth-child(2) > div.route-content > div > div.layer-qalDW.control-bar-layer-m2jto.control-bar-container-xsWA7", // Original
+            ".control-bar-container-xsWA7",
             "div[class*='control-bar-container']",
             "div[class*='control-bar-layer']",
+            "#app > div.router-_65XU.routes-container > div:nth-child(2) > div.route-content > div > div.layer-qalDW.control-bar-layer-m2jto.control-bar-container-xsWA7",
             ".video-player-controls",
         ];
        
@@ -111,51 +154,144 @@ class EnhancedPlayer {
             if (targetContainer) break;
         }
        
-        if (!titleElement || !targetContainer) {
+        if (!titleText || !targetContainer) {
             return;
         }
 
         if (targetContainer.querySelector('.custom-series-name') || targetContainer.querySelector('.custom-movie-title')) {
             return;
         }
-       
-        const titleText = titleElement.textContent.trim();
-        const match = titleText.match(/^(.+?): (.+?) - (.+?) \((\d+x\d+)\)$/);
-
+        
+        // Try multiple regex patterns for different title formats
+        // Pattern 1: "Series Name: Episode Title - Description (1x01)"
+        let match = titleText.match(/^(.+?): (.+?) - (.+?) \((\d+x\d+)\)$/);
+        
+        // Pattern 2: "Series Name - Episode Title (1x01)"
         if (!match) {
+            match = titleText.match(/^(.+?) - (.+?) \((\d+x\d+)\)$/);
+            if (match) {
+                const [, seriesName, episodeTitle, seasonEpisode] = match;
+                
+                const seriesDiv = document.createElement('div');
+                seriesDiv.className = 'custom-series-name';
+                seriesDiv.textContent = seriesName;
+                
+                const episodeDiv = document.createElement('div');
+                episodeDiv.className = 'custom-episode-title';
+                episodeDiv.textContent = `${episodeTitle} (${seasonEpisode})`;
+                
+                targetContainer.insertBefore(seriesDiv, targetContainer.firstChild);
+                targetContainer.insertBefore(episodeDiv, seriesDiv.nextSibling);
+                
+                if (titleElement) titleElement.style.display = 'none';
+                return;
+            }
+        }
+        
+        // Pattern 3: "Series Name (1x01) Episode Title"
+        if (!match) {
+            match = titleText.match(/^(.+?) \((\d+x\d+)\) (.+?)$/);
+            if (match) {
+                const [, seriesName, seasonEpisode, episodeTitle] = match;
+                
+                const seriesDiv = document.createElement('div');
+                seriesDiv.className = 'custom-series-name';
+                seriesDiv.textContent = seriesName;
+                
+                const episodeDiv = document.createElement('div');
+                episodeDiv.className = 'custom-episode-title';
+                episodeDiv.textContent = `${episodeTitle} (${seasonEpisode})`;
+                
+                targetContainer.insertBefore(seriesDiv, targetContainer.firstChild);
+                targetContainer.insertBefore(episodeDiv, seriesDiv.nextSibling);
+                
+                if (titleElement) titleElement.style.display = 'none';
+                return;
+            }
+        }
+
+        // Original pattern match
+        if (match && match.length === 5) {
+            const [, seriesName, episodeTitle, description, seasonEpisode] = match;
+           
+            const seriesDiv = document.createElement('div');
+            seriesDiv.className = 'custom-series-name';
+            seriesDiv.textContent = `${description} (${seasonEpisode})`;
+           
+            const episodeDiv = document.createElement('div');
+            episodeDiv.className = 'custom-episode-title';
+            episodeDiv.textContent = `${seriesName}: ${episodeTitle}`;
+           
+            targetContainer.insertBefore(seriesDiv, targetContainer.firstChild);
+            targetContainer.insertBefore(episodeDiv, seriesDiv.nextSibling);
+           
+            if (titleElement) titleElement.style.display = 'none';
+            return;
+        }
+
+        // Fallback: Just display the title as-is (for movies or unrecognized formats)
+        if (titleText && titleText.length > 0) {
             const movieDiv = document.createElement('div');
             movieDiv.className = 'custom-series-name';
             movieDiv.textContent = titleText;
             
             targetContainer.insertBefore(movieDiv, targetContainer.firstChild);
-            titleElement.style.display = 'none';
-            return;
+            if (titleElement) titleElement.style.display = 'none';
         }
-       
-        // Handle series title
-        const [, seriesName, episodeTitle, description, seasonEpisode] = match;
-       
-        const seriesDiv = document.createElement('div');
-        seriesDiv.className = 'custom-series-name';
-        seriesDiv.textContent = `${description} (${seasonEpisode})`;
-       
-        const episodeDiv = document.createElement('div');
-        episodeDiv.className = 'custom-episode-title';
-        episodeDiv.textContent = `${seriesName}: ${episodeTitle}`;
-       
-        targetContainer.insertBefore(seriesDiv, targetContainer.firstChild);
-        targetContainer.insertBefore(episodeDiv, seriesDiv.nextSibling);
-       
-        titleElement.style.display = 'none';
     }
    
     isValidTitle(text) {
-        if (text && text.includes(':') && text.includes('(') && text.includes('x')) {
+        if (!text || text.trim().length === 0) {
+            return false;
+        }
+        
+        const trimmed = text.trim();
+        
+        // Exclude common non-title patterns (stream sources, addon names, quality tags)
+        const invalidPatterns = [
+            /torrentio/i,
+            /^\[RD/i,           // Real-Debrid source tags
+            /^\[AD/i,           // AllDebrid source tags  
+            /^\[PM/i,           // Premiumize source tags
+            /^\[DL/i,           // Direct link tags
+            /\[.*debrid.*\]/i,  // Any debrid in brackets
+            /^\[.*\]\s*torrentio/i,
+            /^\[.*\]$/,         // Just bracketed text
+            /^http/i,
+            /\.torrent$/i,
+            /^magnet:/i,
+            /debrid/i,
+            /1080p/i,           // Quality indicators
+            /720p/i,
+            /2160p/i,
+            /4k\b/i,
+            /HDR/i,
+            /HEVC/i,
+            /x264/i,
+            /x265/i,
+            /WEB-?DL/i,
+            /BluRay/i,
+            /BRRip/i,
+            /stream/i,
+            /addon/i,
+        ];
+        
+        for (const pattern of invalidPatterns) {
+            if (pattern.test(trimmed)) {
+                return false;
+            }
+        }
+        
+        // Valid if it looks like a series title (has season/episode marker)
+        if (trimmed.includes('x') && /\d+x\d+/.test(trimmed)) {
             return true;
         }
-        if (text && text.trim().length > 0 && !text.includes('x')) {
+        
+        // Valid if it has reasonable length and structure for a movie/show title
+        if (trimmed.length >= 2 && trimmed.length <= 200) {
             return true;
         }
+        
         return false;
     }
 }
