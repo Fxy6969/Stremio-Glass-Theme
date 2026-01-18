@@ -551,11 +551,16 @@ html body {
     min-height: 1.3rem;
 }
 
-.meta-item-container-Tj0Ib
-    .title-bar-container-1Ba0x
-    .menu-label-container-ChuX8
-    .icon-gh1t9 {
+.meta-item-container-Tj0Ib .title-bar-container-1Ba0x .menu-label-container-ChuX8 .icon-gh1t9 {
     visibility: hidden;
+}
+
+.meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .icon-gh1t9 {
+    color: rgb(157, 157, 157);
+}
+
+.meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .label-ZZ2m7 {
+    color: rgb(157, 157, 157);
 }
 
 [class*="meta-item-container"] [class*="title-bar-container"] [class*="title"],
@@ -725,8 +730,9 @@ html body {
 }
 
 .calendar-cH2jw .content-wBwrQ {
-    margin-top: 6rem !important;
-    padding: 0 !important;
+    padding-top: 6rem !important;
+    padding-bottom: 14px !important;
+    padding-left: 14px !important;
 }
 
 .addons-container-ogGYu
@@ -751,7 +757,7 @@ html body {
     .discover-content-CRsRg
     .catalog-container-VNK_T
     .meta-items-container-n8vNz {
-    align-items: center;
+    align-items: start;
     align-self: stretch;
     display: grid;
     flex: 1;
@@ -1792,6 +1798,10 @@ body.ghost-clicking #heroLoadingScreen {
         inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: var(--backdrop-filter) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.library-container-zM_bj .library-content-PgX4O .meta-items-container-IKrND {
+    align-items: start
 }
 
 /* ========================= SIDE DRAWER (EPISODE LIST) GLASS STYLING ========================= */
