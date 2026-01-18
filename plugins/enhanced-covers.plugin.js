@@ -215,86 +215,101 @@
     });
   }
 
-  // Inject styles immediately
-  injectStyles();
-
-  // Initial run with delay to let Stremio load
-  setTimeout(replaceCover, 1000);
-  setTimeout(replaceCover, 2000);
-
-  // Use MutationObserver for efficient DOM change detection
-  coverObserver = new MutationObserver((mutations) => {
-    let shouldUpdate = false;
-    let hasRemovedNodes = false;
-    
-    for (const mutation of mutations) {
-      // Check for removed nodes (item dismissed)
-      if (mutation.removedNodes.length > 0) {
-        for (const node of mutation.removedNodes) {
-          if (node.nodeType === 1) {
-            if (node.matches?.('[class*="meta-item"]') ||
-                node.querySelector?.('[class*="meta-item"]')) {
-              hasRemovedNodes = true;
-              shouldUpdate = true;
-              break;
-            }
-          }
-        }
-      }
-      
-      // Check for added nodes
-      if (mutation.addedNodes.length > 0) {
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === 1) {
-            if (node.matches?.('[class*="continue-watching"]') ||
-                node.querySelector?.('[class*="continue-watching"]') ||
-                node.matches?.('[class*="meta-item"]') ||
-                node.querySelector?.('[class*="meta-item"]') ||
-                node.matches?.('[class*="board-row"]') ||
-                node.querySelector?.('[class*="board-row"]')) {
-              shouldUpdate = true;
-              break;
-            }
-          }
-        }
-      }
-      
-      // Check for attribute changes on images (src changes)
-      if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-        const target = mutation.target;
-        if (target.matches?.('img[class*="poster-image"]')) {
-          shouldUpdate = true;
-        }
-      }
-      
-      if (shouldUpdate) break;
-    }
-    
-    if (shouldUpdate) {
+  function startPlugin() {
+      // Inject styles immediately
       injectStyles();
-      if (hasRemovedNodes) {
-        // Item was removed - need immediate cleanup
-        cleanupStaleCovers();
-        setTimeout(replaceCover, 50);
-      }
-      setTimeout(replaceCover, 100);
-      setTimeout(replaceCover, 500);
-    }
-  });
 
-  coverObserver.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['src']
-  });
+      // Initial run with delay to let Stremio load
+      setTimeout(replaceCover, 1000);
+      setTimeout(replaceCover, 2000);
 
-  // Fallback interval
-  coverInterval = setInterval(replaceCover, 3000);
+      // Use MutationObserver for efficient DOM change detection
+      coverObserver = new MutationObserver((mutations) => {
+        let shouldUpdate = false;
+        let hasRemovedNodes = false;
+        
+        for (const mutation of mutations) {
+          // Check for removed nodes (item dismissed)
+          if (mutation.removedNodes.length > 0) {
+            for (const node of mutation.removedNodes) {
+              if (node.nodeType === 1) {
+                if (node.matches?.('[class*="meta-item"]') ||
+                    node.querySelector?.('[class*="meta-item"]')) {
+                  hasRemovedNodes = true;
+                  shouldUpdate = true;
+                  break;
+                }
+              }
+            }
+          }
+          
+          // Check for added nodes
+          if (mutation.addedNodes.length > 0) {
+            for (const node of mutation.addedNodes) {
+              if (node.nodeType === 1) {
+                if (node.matches?.('[class*="continue-watching"]') ||
+                    node.querySelector?.('[class*="continue-watching"]') ||
+                    node.matches?.('[class*="meta-item"]') ||
+                    node.querySelector?.('[class*="meta-item"]') ||
+                    node.matches?.('[class*="board-row"]') ||
+                    node.querySelector?.('[class*="board-row"]')) {
+                  shouldUpdate = true;
+                  break;
+                }
+              }
+            }
+          }
+          
+          // Check for attribute changes on images (src changes)
+          if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+            const target = mutation.target;
+            if (target.matches?.('img[class*="poster-image"]')) {
+              shouldUpdate = true;
+            }
+          }
+          
+          if (shouldUpdate) break;
+        }
+        
+        if (shouldUpdate) {
+          injectStyles();
+          if (hasRemovedNodes) {
+            // Item was removed - need immediate cleanup
+            cleanupStaleCovers();
+            setTimeout(replaceCover, 50);
+          }
+          setTimeout(replaceCover, 100);
+          setTimeout(replaceCover, 500);
+        }
+      });
+
+      coverObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src']
+      });
+
+      // Fallback interval
+      coverInterval = setInterval(replaceCover, 3000);
+  }
+
+  if (document.body && document.head) {
+      startPlugin();
+  } else {
+      const checkReady = () => {
+          if (document.body && document.head) {
+              startPlugin();
+          } else {
+              setTimeout(checkReady, 50);
+          }
+      };
+      checkReady();
+  }
 
   // Handle navigation changes
   window.addEventListener('hashchange', () => {
-    injectStyles();
+    if (document.head) injectStyles();
     setTimeout(replaceCover, 500);
     setTimeout(replaceCover, 1500);
   });

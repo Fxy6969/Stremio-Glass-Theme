@@ -1,3 +1,26 @@
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+
+        const observer = new MutationObserver(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        
+        const target = document.body || document.documentElement;
+        observer.observe(target, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout: ${selector}`));
+        }, timeout);
+    });
+}
+
 /**
  * @name Enhanced Video Player
  * @description Enhances the video player with additional features and designs.
@@ -10,8 +33,11 @@ class EnhancedPlayer {
     }
    
     init() {
-        this.splitAndMoveTitles();
-        this.addCustomButton();
+        waitForElement('.player-container, .theater-container, .player-video').then(() => {
+             this.splitAndMoveTitles();
+             this.addCustomButton();
+        }).catch(() => console.log("Player not found immediately"));
+
         setTimeout(() => {
             this.splitAndMoveTitles();
             this.addCustomButton();
@@ -20,6 +46,7 @@ class EnhancedPlayer {
             this.splitAndMoveTitles();
             this.addCustomButton();
         });
+        
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
@@ -28,7 +55,9 @@ class EnhancedPlayer {
             '.control-bar-buttons-menu-container-M6L0_',
             "[class*='control-bar-buttons']",
             "[class*='control-bar'] [class*='buttons']",
-            ".control-bar-container-xsWA7 [class*='buttons']"
+            ".control-bar-container-xsWA7 [class*='buttons']",
+            ".player-controls",
+            ".player-ui"
         ];
 
         let controlBarContainer = null;
@@ -146,6 +175,8 @@ class EnhancedPlayer {
             "div[class*='control-bar-layer']",
             "#app > div.router-_65XU.routes-container > div:nth-child(2) > div.route-content > div > div.layer-qalDW.control-bar-layer-m2jto.control-bar-container-xsWA7",
             ".video-player-controls",
+            ".player-ui",
+            ".player-controls"
         ];
        
         let targetContainer = null;
@@ -296,4 +327,15 @@ class EnhancedPlayer {
     }
 }
 
-new EnhancedPlayer();
+if (document.body) {
+    new EnhancedPlayer();
+} else {
+    const checkBody = () => {
+        if (document.body) {
+            new EnhancedPlayer();
+        } else {
+            setTimeout(checkBody, 50);
+        }
+    };
+    checkBody();
+}

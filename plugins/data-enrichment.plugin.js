@@ -1,3 +1,26 @@
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+
+        const observer = new MutationObserver(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        
+        const target = document.body || document.documentElement;
+        observer.observe(target, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout: ${selector}`));
+        }, timeout);
+    });
+}
+
 /**
  * @name Data Enrichment
  * @description Enriches movie and TV show details with TMDB data including enhanced cast, similar titles, collections, and ratings.
@@ -42,8 +65,13 @@ class DataEnrichment {
         this.setupHashChangeListener();
         this.injectSettingsButton();
         
-        // Initial check after short delay
-        setTimeout(() => this.checkForDetailPage(), 1000);
+        // Initial check using waitForElement for robustness
+        waitForElement('.meta-details-container').then(() => {
+             this.checkForDetailPage();
+        }).catch(() => {
+             // Fallback or just wait for observer
+             setTimeout(() => this.checkForDetailPage(), 1000);
+        });
     }
     
     setupHashChangeListener() {
@@ -120,7 +148,7 @@ class DataEnrichment {
         }
         
         // Check if the meta-info-container exists (this means the detail view is loaded)
-        const metaInfoContainer = document.querySelector('[class*="meta-info-container"]');
+        const metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
         if (!metaInfoContainer) {
             // Detail view not loaded yet, wait for next check
             return;
@@ -290,7 +318,7 @@ class DataEnrichment {
         // We want to append our enrichment content at the END of that container
         
         // Priority 1: Look for the meta-info-container (this is where metadata is displayed)
-        let metaInfoContainer = document.querySelector('[class*="meta-info-container"]');
+        let metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
         
         if (metaInfoContainer) {
             console.log('[DataEnrichment] Found meta-info-container');
@@ -795,4 +823,15 @@ class DataEnrichment {
 }
 
 // Initialize plugin
-new DataEnrichment();
+if (document.body) {
+    new DataEnrichment();
+} else {
+    const checkBody = () => {
+        if (document.body) {
+            new DataEnrichment();
+        } else {
+            setTimeout(checkBody, 50);
+        }
+    };
+    checkBody();
+}

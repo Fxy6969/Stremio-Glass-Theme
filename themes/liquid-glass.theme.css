@@ -41,145 +41,11 @@
     border: 1px solid rgba(255, 255, 255, 0.04) !important; */
 
 html body {
-  background: var(--background) !important;
+  background: var(--background);
   overflow-y: scroll !important;
 }
 
-/* ========================= CONTEXT MENU Z-INDEX FIX ========================= */
-/* Styles for context-menu-fix.plugin.js */
 
-/* Portal wrapper created by context-menu-fix plugin */
-.context-menu-portal {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none !important;
-  z-index: 2147483647 !important;
-}
-
-.context-menu-portal > * {
-  pointer-events: auto !important;
-}
-
-/* Glass styling for context menu inside portal */
-.context-menu-portal .menu-container-B6cqK,
-.context-menu-portal [class*="menu-container"][class*="menu-direction"] {
-  z-index: 2147483647 !important;
-  background: rgba(30, 30, 30, 0.92) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-  overflow: hidden !important;
-}
-
-/* Context menu content - handle all class variations */
-.context-menu-portal [class*="context-menu-content"] {
-  background: transparent !important;
-  padding: 6px !important;
-}
-
-/* Context menu title (stream info header) */
-.context-menu-portal [class*="context-menu-title"] {
-  padding: 12px 16px !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-size: 12px !important;
-  line-height: 1.5 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  margin-bottom: 4px !important;
-  white-space: pre-wrap !important;
-}
-
-/* Context menu options - handle all class variations */
-.context-menu-portal [class*="context-menu-option-container"] {
-  padding: 10px 16px !important;
-  border-radius: 8px !important;
-  margin: 2px 4px !important;
-  transition: all 0.2s ease !important;
-  background: transparent !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-
-.context-menu-portal [class*="context-menu-option-container"]:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Menu icons */
-.context-menu-portal [class*="menu-icon"] {
-  width: 18px !important;
-  height: 18px !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  flex-shrink: 0 !important;
-}
-
-/* Option labels - handle all class variations */
-.context-menu-portal [class*="context-menu-option-label"] {
-  color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-}
-
-/* Original context menus (non-portal) */
-.menu-container-B6cqK,
-[class*="menu-container"][class*="menu-direction"],
-[data-focus-lock-disabled] {
-  z-index: 2147483647 !important;
-}
-
-[class*="context-menu-content"] {
-  background: rgba(30, 30, 30, 0.92) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
-
-[class*="context-menu-title"] {
-  padding: 12px 16px !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-size: 12px !important;
-  line-height: 1.5 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-[class*="context-menu-option-container"] {
-  padding: 10px 16px !important;
-  transition: all 0.2s ease !important;
-}
-
-[class*="context-menu-option-container"]:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Reset stacking context on containers that might trap the menu */
-.series-content-VkYHB,
-[class*="series-content"] {
-  isolation: auto !important;
-  contain: none !important;
-}
-
-/* Side drawer - lower z-index than menu */
-.side-drawer-r9EuA,
-[class*="side-drawer"] {
-  z-index: 1000 !important;
-}
-
-/* Video containers should not create stacking contexts */
-.video-container-ezBpK,
-.videos-nRM2D,
-.label-container-XOyzm {
-  isolation: auto !important;
-}
 
 ::-webkit-scrollbar {
   width: 0;  /* removes scrollbar track */
@@ -2174,4 +2040,112 @@ body.ghost-clicking #heroLoadingScreen {
     background: rgba(255, 152, 0, 0.15) !important;
     color: rgba(255, 183, 77, 1) !important;
     border: 1px solid rgba(255, 152, 0, 0.2) !important;
+}
+
+/* ========================= PLAYER FIXES ========================= */
+/* These rules ensure the video player and MPV container are visible */
+/* Fix for Liquid Glass theme breaking video rendering */
+
+.theater-container,
+.player-container,
+.video-player,
+.mpv-embed,
+.video-surface,
+[class*='theater-container'],
+[class*='player-container'],
+[class*='video-player'],
+[class*='mpv-embed'],
+[class*='video-surface'],
+video {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Ensure the player UI doesn't cover the video if it's meant to be background */
+.player-container-wIELK {
+    background: transparent !important;
+}
+
+
+/* ========================= CONTEXT MENU STYLING (PORTAL) ========================= */
+/* Visual styles for the context menu when moved by the plugin */
+
+.context-menu-portal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+}
+
+.context-menu-portal > * {
+  pointer-events: auto !important;
+}
+
+/* Glass styling for context menu inside portal */
+.context-menu-portal .menu-container-B6cqK,
+.context-menu-portal [class*='menu-container'][class*='menu-direction'] {
+  z-index: 2147483647 !important;
+  background: rgba(30, 30, 30, 0.92) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+
+/* Context menu content */
+.context-menu-portal [class*='context-menu-content'] {
+  background: transparent !important;
+  padding: 6px !important;
+}
+
+/* Context menu title */
+.context-menu-portal [class*='context-menu-title'] {
+  padding: 12px 16px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-bottom: 4px !important;
+  white-space: pre-wrap !important;
+}
+
+/* Context menu options */
+.context-menu-portal [class*='context-menu-option-container'] {
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  margin: 2px 4px !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.context-menu-portal [class*='context-menu-option-container']:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Menu icons */
+.context-menu-portal [class*='menu-icon'] {
+  width: 18px !important;
+  height: 18px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Option labels */
+.context-menu-portal [class*='context-menu-option-label'] {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
 }

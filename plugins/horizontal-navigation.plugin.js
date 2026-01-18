@@ -48,8 +48,20 @@ const observer = new MutationObserver(() => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(fixAllNavbars, 50);
 });
-observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-setInterval(fixAllNavbars, 20);
 
-// Initial call
-fixAllNavbars();
+if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    setInterval(fixAllNavbars, 20);
+    fixAllNavbars();
+} else {
+    const checkBody = () => {
+        if (document.body) {
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+            setInterval(fixAllNavbars, 20);
+            fixAllNavbars();
+        } else {
+            setTimeout(checkBody, 50);
+        }
+    };
+    checkBody();
+}
