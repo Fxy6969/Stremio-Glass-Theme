@@ -1801,7 +1801,7 @@ body.ghost-clicking #heroLoadingScreen {
 }
 
 .library-container-zM_bj .library-content-PgX4O .meta-items-container-IKrND {
-    align-items: start
+    align-items: start;
 }
 
 /* ========================= SIDE DRAWER (EPISODE LIST) GLASS STYLING ========================= */
