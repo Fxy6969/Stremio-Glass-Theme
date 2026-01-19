@@ -325,6 +325,9 @@ html body {
 /* Style any menu/button container in the top nav */
 #app
     nav[class*="horizontal-nav-bar"]
+    > div[class*="button-container"],
+#app
+    nav[class*="horizontal-nav-bar"]
     [class*="buttons-container"]
     > div[class*="button-container"],
 #app
@@ -490,6 +493,19 @@ html body {
     --thumb-size: 0.9rem;
     margin-left: 11px;
     margin-right: 11px;
+}
+
+.toasts-container-oKECy .toast-item-container-nG0uk {
+    background: rgba(70, 70, 70, 0.22) !important;
+    border-radius: 20px !important;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    opacity: 1 !important;
 }
 
 /* title container */
@@ -1748,12 +1764,10 @@ body.ghost-clicking #heroLoadingScreen {
 .cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
