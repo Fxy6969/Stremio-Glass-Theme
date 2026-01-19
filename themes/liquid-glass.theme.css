@@ -1767,7 +1767,7 @@ body.ghost-clicking #heroLoadingScreen {
         0 2px 8px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
