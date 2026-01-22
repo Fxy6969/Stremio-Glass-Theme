@@ -1,3 +1,27 @@
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+
+        const observer = new MutationObserver(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        
+        // Safe observation target
+        const target = document.body || document.documentElement;
+        observer.observe(target, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout: ${selector}`));
+        }, timeout);
+    });
+}
+
 /**
  * @name Context Menu Fix
  * @description Fixes context menus appearing behind UI elements by moving them to the document root.
@@ -36,7 +60,11 @@ class ContextMenuFix {
     checkAndFixContextMenu(element) {
         // Check if this is a context menu or contains one (handle multiple class name variations)
         const isContextMenu = element.classList?.contains('menu-container-B6cqK') ||
+                              element.classList?.contains('meta-item-menu') ||
+                              element.classList?.contains('player-controls-menu') ||
                               element.querySelector?.('.menu-container-B6cqK') ||
+                              element.querySelector?.('.meta-item-menu') ||
+                              element.querySelector?.('.player-controls-menu') ||
                               element.classList?.contains('context-menu-content-ItIFy') ||
                               element.classList?.contains('context-menu-content-Xe_lN') ||
                               element.querySelector?.('[class*="context-menu-content"]') ||
@@ -46,8 +74,13 @@ class ContextMenuFix {
 
         // Find the actual menu container
         let menuContainer = element;
-        if (!element.classList?.contains('menu-container-B6cqK')) {
-            menuContainer = element.querySelector?.('.menu-container-B6cqK') || element;
+        if (!element.classList?.contains('menu-container-B6cqK') &&
+            !element.classList?.contains('meta-item-menu') &&
+            !element.classList?.contains('player-controls-menu')) {
+            menuContainer = element.querySelector?.('.menu-container-B6cqK') || 
+                            element.querySelector?.('.meta-item-menu') ||
+                            element.querySelector?.('.player-controls-menu') ||
+                            element;
         }
 
         // Check if it's already a direct child of body or inside our portal
@@ -55,7 +88,7 @@ class ContextMenuFix {
         if (menuContainer.closest('.context-menu-portal')) return;
 
         // Check if it's inside a problematic container (side drawer, player, etc.)
-        const problematicParent = menuContainer.closest('.side-drawer-r9EuA, [class*="side-drawer"], .series-content-VkYHB, [class*="series-content"], .player-container-wIELK, [class*="player-container"]');
+        const problematicParent = menuContainer.closest('.side-drawer-r9EuA, [class*="side-drawer"], .series-content-VkYHB, [class*="series-content"], .player-container-wIELK, [class*="player-container"], .theater-container, .player-video');
         
         if (problematicParent) {
             this.moveMenuToBody(menuContainer);
@@ -170,4 +203,15 @@ class ContextMenuFix {
     }
 }
 
-new ContextMenuFix();
+if (document.body) {
+    new ContextMenuFix();
+} else {
+    const checkBody = () => {
+        if (document.body) {
+            new ContextMenuFix();
+        } else {
+            setTimeout(checkBody, 50);
+        }
+    };
+    checkBody();
+}

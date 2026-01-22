@@ -1,3 +1,26 @@
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+
+        const observer = new MutationObserver(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        
+        const target = document.body || document.documentElement;
+        observer.observe(target, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout: ${selector}`));
+        }, timeout);
+    });
+}
+
 /**
  * @name Data Enrichment
  * @description Enriches movie and TV show details with TMDB data including enhanced cast, similar titles, collections, and ratings.
@@ -42,8 +65,13 @@ class DataEnrichment {
         this.setupHashChangeListener();
         this.injectSettingsButton();
         
-        // Initial check after short delay
-        setTimeout(() => this.checkForDetailPage(), 1000);
+        // Initial check using waitForElement for robustness
+        waitForElement('.meta-details-container').then(() => {
+             this.checkForDetailPage();
+        }).catch(() => {
+             // Fallback or just wait for observer
+             setTimeout(() => this.checkForDetailPage(), 1000);
+        });
     }
     
     setupHashChangeListener() {
@@ -120,7 +148,7 @@ class DataEnrichment {
         }
         
         // Check if the meta-info-container exists (this means the detail view is loaded)
-        const metaInfoContainer = document.querySelector('[class*="meta-info-container"]');
+        const metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
         if (!metaInfoContainer) {
             // Detail view not loaded yet, wait for next check
             return;
@@ -290,7 +318,7 @@ class DataEnrichment {
         // We want to append our enrichment content at the END of that container
         
         // Priority 1: Look for the meta-info-container (this is where metadata is displayed)
-        let metaInfoContainer = document.querySelector('[class*="meta-info-container"]');
+        let metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
         
         if (metaInfoContainer) {
             console.log('[DataEnrichment] Found meta-info-container');
@@ -469,6 +497,9 @@ class DataEnrichment {
         const titles = similar.results?.slice(0, 15) || [];
         if (titles.length === 0) return;
 
+        // Determine media type from the current data
+        const mediaType = similar.results[0]?.media_type || (similar.results[0]?.first_air_date ? 'tv' : 'movie');
+
         const section = document.createElement('div');
         section.className = 'enhanced-similar-section enhanced-carousel';
         section.innerHTML = `
@@ -477,7 +508,7 @@ class DataEnrichment {
                 <button class="enhanced-scroll-btn enhanced-scroll-left" aria-label="Scroll left">‹</button>
                 <div class="enhanced-similar-container enhanced-scroll-container">
                     ${titles.map(item => `
-                        <div class="enhanced-similar-item enhanced-poster-item" data-id="${item.id}">
+                        <div class="enhanced-similar-item enhanced-poster-item" data-id="${item.id}" data-media-type="${item.media_type || mediaType}">
                             ${item.poster_path 
                                 ? `<img class="enhanced-similar-poster" src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title || item.name}" loading="lazy">`
                                 : `<div class="enhanced-similar-placeholder">${item.title || item.name}</div>`
@@ -492,6 +523,7 @@ class DataEnrichment {
         
         container.appendChild(section);
         this.setupScrollButtons(section);
+        this.setupPosterClickHandlers(section);
     }
 
     async injectCollection(collection, container) {
@@ -514,7 +546,7 @@ class DataEnrichment {
                 <button class="enhanced-scroll-btn enhanced-scroll-left" aria-label="Scroll left">‹</button>
                 <div class="enhanced-collection-container enhanced-scroll-container">
                     ${parts.map(item => `
-                        <div class="enhanced-collection-item enhanced-poster-item" data-id="${item.id}">
+                        <div class="enhanced-collection-item enhanced-poster-item" data-id="${item.id}" data-media-type="movie">
                             ${item.poster_path 
                                 ? `<img class="enhanced-collection-poster" src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title}" loading="lazy">`
                                 : `<div class="enhanced-collection-placeholder">${item.title}</div>`
@@ -529,6 +561,7 @@ class DataEnrichment {
         
         container.appendChild(section);
         this.setupScrollButtons(section);
+        this.setupPosterClickHandlers(section);
     }
 
     setupScrollButtons(section) {
@@ -561,6 +594,66 @@ class DataEnrichment {
         
         // Initial check
         setTimeout(updateButtonVisibility, 100);
+    }
+
+    setupPosterClickHandlers(section) {
+        const posterItems = section.querySelectorAll('.enhanced-poster-item');
+        
+        posterItems.forEach(item => {
+            // Add cursor pointer style
+            item.style.cursor = 'pointer';
+            
+            item.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const tmdbId = item.dataset.id;
+                const mediaType = item.dataset.mediaType || 'movie';
+                
+                if (!tmdbId) {
+                    console.log('[DataEnrichment] No TMDB ID found on poster item');
+                    return;
+                }
+                
+                // Show loading state
+                item.style.opacity = '0.6';
+                item.style.pointerEvents = 'none';
+                
+                try {
+                    // Fetch external IDs to get IMDB ID
+                    const externalIdsUrl = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}/external_ids?api_key=${this.config.tmdbApiKey}`;
+                    const response = await fetch(externalIdsUrl);
+                    
+                    if (!response.ok) {
+                        console.error('[DataEnrichment] Failed to fetch external IDs:', response.status);
+                        return;
+                    }
+                    
+                    const externalIds = await response.json();
+                    const imdbId = externalIds.imdb_id;
+                    
+                    if (!imdbId) {
+                        console.log('[DataEnrichment] No IMDB ID found for TMDB ID:', tmdbId);
+                        // Try to show a notification or fallback
+                        return;
+                    }
+                    
+                    console.log('[DataEnrichment] Navigating to:', imdbId);
+                    
+                    // Navigate to the detail page using Stremio's hash-based routing
+                    // Format: #/detail/{type}/{imdbId}
+                    const stremioType = mediaType === 'tv' ? 'series' : 'movie';
+                    window.location.hash = `#/detail/${stremioType}/${imdbId}`;
+                    
+                } catch (error) {
+                    console.error('[DataEnrichment] Error navigating to item:', error);
+                } finally {
+                    // Restore item state
+                    item.style.opacity = '';
+                    item.style.pointerEvents = '';
+                }
+            });
+        });
     }
 
     checkForPosters() {
@@ -730,4 +823,15 @@ class DataEnrichment {
 }
 
 // Initialize plugin
-new DataEnrichment();
+if (document.body) {
+    new DataEnrichment();
+} else {
+    const checkBody = () => {
+        if (document.body) {
+            new DataEnrichment();
+        } else {
+            setTimeout(checkBody, 50);
+        }
+    };
+    checkBody();
+}

@@ -45,8 +45,6 @@ html body {
     overflow-y: scroll !important;
 }
 
-/* ========================= CONTEXT MENU Z-INDEX FIX ========================= */
-/* Styles for context-menu-fix.plugin.js */
 
 /* Portal wrapper created by context-menu-fix plugin */
 .context-menu-portal {

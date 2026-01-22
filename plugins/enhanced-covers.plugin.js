@@ -231,12 +231,13 @@
     });
   }
 
-  // Inject styles immediately
-  injectStyles();
+  function startPlugin() {
+      // Inject styles immediately
+      injectStyles();
 
-  // Initial run with delay to let Stremio load
-  setTimeout(replaceCover, 1000);
-  setTimeout(replaceCover, 2000);
+      // Initial run with delay to let Stremio load
+      setTimeout(replaceCover, 1000);
+      setTimeout(replaceCover, 2000);
 
   // Use MutationObserver for efficient DOM change detection
   coverObserver = new MutationObserver((mutations) => {
@@ -273,9 +274,10 @@
               node.querySelector?.('[class*="board-row"]')
             ) {
               shouldUpdate = true;
-              break;
             }
           }
+          
+          if (shouldUpdate) break;
         }
       }
 
@@ -309,8 +311,18 @@
     attributeFilter: ["src"],
   });
 
-  // Fallback interval
-  coverInterval = setInterval(replaceCover, 3000);
+  if (document.body && document.head) {
+      startPlugin();
+  } else {
+      const checkReady = () => {
+          if (document.body && document.head) {
+              startPlugin();
+          } else {
+              setTimeout(checkReady, 50);
+          }
+      };
+      checkReady();
+  }
 
   // Handle navigation changes
   window.addEventListener("hashchange", () => {

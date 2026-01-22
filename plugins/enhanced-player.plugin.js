@@ -1,3 +1,26 @@
+function waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) return resolve(element);
+
+        const observer = new MutationObserver(() => {
+            const el = document.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        
+        const target = document.body || document.documentElement;
+        observer.observe(target, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            observer.disconnect();
+            reject(new Error(`Timeout: ${selector}`));
+        }, timeout);
+    });
+}
+
 /**
  * @name Enhanced Video Player
  * @description Enhances the video player with additional features and designs.

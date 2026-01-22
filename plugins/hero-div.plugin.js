@@ -142,6 +142,7 @@
     if (cleanRuntime.match(/^\d+\s*min$/i)) {
       return cleanRuntime;
     }
+  }
 
     return cleanRuntime || "Unknown";
   }
