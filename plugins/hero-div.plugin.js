@@ -142,6 +142,7 @@
     if (cleanRuntime.match(/^\d+\s*min$/i)) {
       return cleanRuntime;
     }
+  }
 
     return cleanRuntime || "Unknown";
   }
@@ -996,43 +997,28 @@
     }
   });
 
-  function startHeroObserver() {
-      window.heroObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: false,
-        characterData: false,
-      });
+  window.heroObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: false,
+    characterData: false,
+  });
 
-      setInterval(() => {
-        const heroExists = document.querySelector(".hero-container");
-        const shouldShow = shouldShowHero();
+  setInterval(() => {
+    const heroExists = document.querySelector(".hero-container");
+    const shouldShow = shouldShowHero();
 
-        if (
-          shouldShow &&
-          !heroExists &&
-          !heroState.isInitializing &&
-          !document.getElementById("heroLoadingScreen")
-        ) {
-          addHeroDiv();
-        }
-      }, 3000);
+    if (
+      shouldShow &&
+      !heroExists &&
+      !heroState.isInitializing &&
+      !document.getElementById("heroLoadingScreen")
+    ) {
+      addHeroDiv();
+    }
+  }, 3000);
 
-      setTimeout(() => {
-        handleNavigation();
-      }, 1000);
-  }
-
-  if (document.body) {
-      startHeroObserver();
-  } else {
-      const checkBody = () => {
-          if (document.body) {
-              startHeroObserver();
-          } else {
-              setTimeout(checkBody, 50);
-          }
-      };
-      checkBody();
-  }
+  setTimeout(() => {
+    handleNavigation();
+  }, 1000);
 })();
