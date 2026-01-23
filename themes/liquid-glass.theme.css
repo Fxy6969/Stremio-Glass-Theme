@@ -19,7 +19,7 @@
     --primary-accent-color: #fff;
     --background: rgb(20, 20, 20);
 
-    --bg-color: rgb(250, 251, 255, 0.74);
+    --bg-color: rgba(250, 251, 255, 0.74);
     --bg-color-img: linear-gradient(45deg, #f4f4fc, #f4f4fc);
     --bg-progress-color: #0c0c0c;
     --bg-hover-color: rgba(12, 12, 12, 0.05);
@@ -1650,7 +1650,7 @@ body.ghost-clicking #heroLoadingScreen {
 }
 
 .library-container-zM_bj .meta-item-container-Tj0Ib .poster-container-qkw48 .watched-icon-layer-bi3DO {
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%) !important; 
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%) !important;
     backdrop-filter: none !important;
 }
 
@@ -1777,7 +1777,7 @@ body.ghost-clicking #heroLoadingScreen {
 
 .cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
     color: rgb(20, 20, 20) !important;
-    background: var(--bg-color) !important;
+    background: var(--or) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
