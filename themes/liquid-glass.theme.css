@@ -570,7 +570,7 @@ html body {
 }
 
 .meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 {
-    z-index: 1;
+    z-index: 50;
 }
 
 .meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .icon-gh1t9 {
@@ -1647,6 +1647,11 @@ body.ghost-clicking #heroLoadingScreen {
     pointer-events: none !important; /* let clicks pass through if needed */
     opacity: 1 !important;
     transition: opacity 0.25s ease !important;
+}
+
+.library-container-zM_bj .meta-item-container-Tj0Ib .poster-container-qkw48 .watched-icon-layer-bi3DO {
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%) !important; 
+    backdrop-filter: none !important;
 }
 
 /* Hide any existing inner icons/svg so only our pseudo-elements show */
