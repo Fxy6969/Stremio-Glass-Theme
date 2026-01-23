@@ -381,8 +381,8 @@ html body {
     padding: 0 5px !important;
 }
 
-/* Selected tab look */
-#app [class*="nav-tab-button-container"].selected {
+/* Tabs look */
+#app [class*="nav-tab-button-container"] {
     background: rgba(70, 70, 70, 0.22) !important;
     border-radius: 999px !important;
     box-shadow:
@@ -1071,7 +1071,7 @@ body.ghost-clicking #heroLoadingScreen {
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
     opacity: 1 !important;
     transform: translateY(0px) scale(1) !important;
 }
@@ -1576,10 +1576,17 @@ body.ghost-clicking #heroLoadingScreen {
 .chip-L3r9A.active-jnhyP {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.menu-xeE06 .button-DNmYL.selected-S7SeK {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: var(--backdrop-filter) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
@@ -1760,12 +1767,8 @@ body.ghost-clicking #heroLoadingScreen {
 }
 
 .cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
-    background: rgba(70, 70, 70, 0.22) !important;
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: rgb(20, 20, 20) !important;
+    background: var(--bg-color) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
