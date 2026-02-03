@@ -19,7 +19,7 @@
     --primary-accent-color: #fff;
     --background: rgb(20, 20, 20);
 
-    --bg-color: rgb(250, 251, 255, 0.74);
+    --bg-color: rgba(250, 251, 255, 0.74);
     --bg-color-img: linear-gradient(45deg, #f4f4fc, #f4f4fc);
     --bg-progress-color: #0c0c0c;
     --bg-hover-color: rgba(12, 12, 12, 0.05);
@@ -381,8 +381,8 @@ html body {
     padding: 0 5px !important;
 }
 
-/* Selected tab look */
-#app [class*="nav-tab-button-container"].selected {
+/* Tabs look */
+#app [class*="nav-tab-button-container"] {
     background: rgba(70, 70, 70, 0.22) !important;
     border-radius: 999px !important;
     box-shadow:
@@ -466,6 +466,15 @@ html body {
     backdrop-filter: var(--backdrop-filter) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
     opacity: 1 !important;
+}
+
+.next-video-popup-container-H4wnL .button-container-i4F7t.play-button-Dluk6 {
+    background: none !important;
+    outline: none !important;
+}
+
+.next-video-popup-container-H4wnL .button-container-i4F7t.play-button-Dluk6:hover {
+    background: var(--overlay-color) !important;
 }
 
 .option-container-m_jZq {
@@ -567,6 +576,10 @@ html body {
 
 .meta-item-container-Tj0Ib .title-bar-container-1Ba0x .menu-label-container-ChuX8 .icon-gh1t9 {
     visibility: hidden;
+}
+
+.meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 {
+    z-index: 50;
 }
 
 .meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .icon-gh1t9 {
@@ -1071,7 +1084,7 @@ body.ghost-clicking #heroLoadingScreen {
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
         inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
     opacity: 1 !important;
     transform: translateY(0px) scale(1) !important;
 }
@@ -1576,10 +1589,17 @@ body.ghost-clicking #heroLoadingScreen {
 .chip-L3r9A.active-jnhyP {
     background: rgba(70, 70, 70, 0.22) !important;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: var(--backdrop-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.menu-xeE06 .button-DNmYL.selected-S7SeK {
+    background: rgba(70, 70, 70, 0.22) !important;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: var(--backdrop-filter) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
@@ -1636,6 +1656,11 @@ body.ghost-clicking #heroLoadingScreen {
     pointer-events: none !important; /* let clicks pass through if needed */
     opacity: 1 !important;
     transition: opacity 0.25s ease !important;
+}
+
+.library-container-zM_bj .meta-item-container-Tj0Ib .poster-container-qkw48 .watched-icon-layer-bi3DO {
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
+    backdrop-filter: none !important;
 }
 
 /* Hide any existing inner icons/svg so only our pseudo-elements show */
@@ -1760,12 +1785,8 @@ body.ghost-clicking #heroLoadingScreen {
 }
 
 .cell-l3eWl.today-G8kuO .heading-TYXvp .day-nttmc {
-    background: rgba(70, 70, 70, 0.22) !important;
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: var(--backdrop-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: rgb(20, 20, 20) !important;
+    background: var(--bg-color) !important;
 }
 
 .shortcut-container-iOrn9 kbd {
