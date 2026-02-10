@@ -1,9 +1,9 @@
 # Modern Glass – Stremio Theme + QoL Enhancements  
 ![Modern Glass Banner](assets/MainPage.png)
 
-[![GitHub stars](https://img.shields.io/github/stars/GITHUB_USERNAME/REPO_NAME?style=social)](https://github.com/Fxy6969/Stremio-Glass-Theme/stargazers)
-[![GitHub release](https://img.shields.io/github/v/release/GITHUB_USERNAME/REPO_NAME?style=flat&logo=github)](https://github.com/Fxy6969/Stremio-Glass-Theme/releases)
-[![Discord](https://img.shields.io/discord/DISCORD_SERVER_ID?style=flat&logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/qxDpXdq6)
+[![GitHub stars](https://img.shields.io/github/stars/Fxy6969/Stremio-Glass-Theme?style=social)](https://github.com/Fxy6969/Stremio-Glass-Theme/stargazers)
+[![GitHub release](https://img.shields.io/github/v/release/Fxy6969/Stremio-Glass-Theme?style=flat&logo=github)](https://github.com/Fxy6969/Stremio-Glass-Theme/releases)
+[![Discord](https://img.shields.io/discord/1470879221164282064?style=flat&logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/qxDpXdq6)
 [![Reddit Community](https://img.shields.io/reddit/subreddit-subscribers/StremioMods?style=social&logo=reddit&label=r/StremioMods)](https://www.reddit.com/r/StremioMods/)  
 
 **Modern Glass** is a complete visual overhaul for Stremio Enhanced.  
