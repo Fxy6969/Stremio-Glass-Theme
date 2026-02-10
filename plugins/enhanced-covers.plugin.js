@@ -2,7 +2,7 @@
  * @name EnhancedCovers
  * @description Widens the cover images in the Continue Watching section using background images with logo overlay.
  * @updateUrl none
- * @version 1.0.1
+ * @version 26.0.1
  * @author Fxy rewritten and improved by MrBlu03
  */
 

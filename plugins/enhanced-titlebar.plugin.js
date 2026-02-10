@@ -1,7 +1,7 @@
 /**
  * @name Enhanced Title Bar
  * @description Enhances the title bar with additional information.
- * @version 1.0.1
+ * @version 26.0.1
  * @author Fxy
  */
 
@@ -17,6 +17,9 @@ const RETRY_CONFIG = {
 };
 let enhanceTimeout = null;
 let mutationObserver = null;
+let isEnhancing = false;
+let lastEnhanceRun = 0;
+const MIN_RUN_INTERVAL = 800;
 
 function injectStyles() {
   if (document.getElementById("enhanced-title-bar-styles")) return;
@@ -136,23 +139,27 @@ async function resolveMetadata(imdbId, typeHints) {
   return null;
 }
 
-function extractImdbId(posterImg, detailLink, container) {
+function extractImdbId(posterImg, detailLink, cardOrContainer) {
   const candidates = [];
 
   if (posterImg) {
+    candidates.push(posterImg.getAttribute("data-imdb-id"));
     candidates.push(posterImg.getAttribute("src"));
     candidates.push(posterImg.getAttribute("data-src"));
     candidates.push(posterImg.getAttribute("data-original"));
   }
 
-  if (container && container.dataset) {
-    candidates.push(container.dataset.imdb);
-    candidates.push(container.dataset.id);
+  if (cardOrContainer && cardOrContainer.dataset) {
+    candidates.push(cardOrContainer.dataset.imdb);
+    candidates.push(cardOrContainer.dataset.id);
   }
 
   if (detailLink) {
     candidates.push(detailLink.getAttribute("href"));
     candidates.push(detailLink.getAttribute("data-id"));
+    if (detailLink.id && /^tt\d{7,}$/.test(detailLink.id)) {
+      candidates.push(detailLink.id);
+    }
   }
 
   for (let i = 0; i < candidates.length; i++) {
@@ -195,6 +202,18 @@ function createMetadataElements(metadata) {
 }
 
 async function enhanceMediaContainers() {
+  if (isEnhancing) return;
+  isEnhancing = true;
+  lastEnhanceRun = Date.now();
+
+  try {
+    await enhanceMediaContainersImpl();
+  } finally {
+    isEnhancing = false;
+  }
+}
+
+async function enhanceMediaContainersImpl() {
   // Find all media containers using multiple possible selectors
   const containerSelectors = [
     '[class*="poster-container"]',
@@ -253,35 +272,40 @@ async function enhanceContainer(container) {
     posterImg = container.querySelector("img");
   }
 
-  let detailLink = posterImg
-    ? posterImg.closest('a[href^="stremio:///detail/"]')
+  // Card = single tile (one poster + one titlebar). Never use container-level
+  // querySelector for link/titlebar or we pair CW with Popular when container spans both.
+  const card = posterImg
+    ? posterImg.closest("[class*=\"meta-item\"]") ||
+      posterImg.closest("[class*=\"poster-container\"]")?.parentElement ||
+      posterImg.parentElement
     : null;
-  if (!detailLink) {
-    let node = posterImg ? posterImg.parentElement : container;
-    let depth = 0;
-    while (node && depth < 5 && !detailLink) {
+
+  // Only use a detail link that is inside this card (or wraps the poster). Never
+  // container.querySelector('a[...]') — that can return another row's link (e.g. Popular).
+  let detailLink = posterImg
+    ? posterImg.closest('a[href^="stremio:///detail/"], a[href*="#/detail/"]')
+    : null;
+  if (!detailLink && card) {
+    detailLink = card.querySelector('a[href^="stremio:///detail/"], a[href*="#/detail/"]');
+  }
+  if (!detailLink && posterImg) {
+    let node = posterImg.parentElement;
+    for (let depth = 0; node && depth < 5; depth++) {
       if (
         node.tagName === "A" &&
         node.href &&
-        node.href.indexOf("stremio:///detail/") === 0
+        (node.href.indexOf("stremio:///detail/") === 0 || node.href.indexOf("#/detail/") !== -1)
       ) {
         detailLink = node;
         break;
       }
       node = node.parentElement;
-      depth++;
     }
-  }
-
-  if (!detailLink) {
-    detailLink = container.querySelector('a[href^="stremio:///detail/"]');
   }
 
   if (!posterImg && !detailLink) {
     return;
   }
-
-  // Find titlebar in this container
   const titlebarSelectors = [
     '[class*="title-bar-container"]',
     '[class*="title-bar"]',
@@ -290,12 +314,59 @@ async function enhanceContainer(container) {
   ];
 
   let titlebar = null;
-  for (const selector of titlebarSelectors) {
-    titlebar = container.querySelector(selector);
-    if (titlebar) break;
+  if (card) {
+    for (const selector of titlebarSelectors) {
+      titlebar = card.querySelector(selector);
+      if (titlebar) break;
+    }
+    if (!titlebar && card.nextElementSibling) {
+      const next = card.nextElementSibling;
+      if (next.matches && next.matches("[class*=\"title-bar\"], [class*=\"title-label\"]")) {
+        titlebar = next;
+      } else {
+        for (const selector of titlebarSelectors) {
+          titlebar = next.querySelector(selector);
+          if (titlebar) break;
+        }
+      }
+    }
+  }
+  if (!titlebar && card) {
+    // First titlebar that follows the poster within the same card only
+    for (const selector of titlebarSelectors) {
+      const list = card.querySelectorAll(selector);
+      for (let i = 0; i < list.length; i++) {
+        const el = list[i];
+        if (posterImg.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) {
+          titlebar = el;
+          break;
+        }
+      }
+      if (titlebar) break;
+    }
+  }
+  if (!titlebar) {
+    for (const selector of titlebarSelectors) {
+      const list = (card || container).querySelectorAll(selector);
+      for (let i = 0; i < list.length; i++) {
+        const el = list[i];
+        if (posterImg.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) {
+          titlebar = el;
+          break;
+        }
+      }
+      if (titlebar) break;
+    }
+  }
+  if (!titlebar) {
+    for (const selector of titlebarSelectors) {
+      titlebar = (card || container).querySelector(selector);
+      if (titlebar) break;
+    }
   }
 
   if (!titlebar) return;
+  if (card && !card.contains(titlebar)) return;
 
   // Get the original title text
   const titleElement = titlebar.querySelector('[class*="title"]') || titlebar;
@@ -324,7 +395,7 @@ async function enhanceContainer(container) {
 
   if (!originalTitle) return;
 
-  const imdbId = extractImdbId(posterImg, detailLink, container);
+  const imdbId = extractImdbId(posterImg, detailLink, card || container);
   if (!imdbId) return;
 
   // Check if already enhanced with correct content (like covers plugin)
@@ -452,14 +523,29 @@ async function enhanceContainer(container) {
   }
 }
 
-function scheduleEnhancement() {
+function isOwnEnhancementMutation(target) {
+  return (
+    target &&
+    typeof target.closest === "function" &&
+    target.closest(".enhanced-title-bar")
+  );
+}
+
+function scheduleEnhancement(mutationTarget) {
+  if (mutationTarget && isOwnEnhancementMutation(mutationTarget)) {
+    return;
+  }
   if (enhanceTimeout) {
     clearTimeout(enhanceTimeout);
   }
   enhanceTimeout = setTimeout(() => {
     enhanceTimeout = null;
+    const now = Date.now();
+    if (isEnhancing || now - lastEnhanceRun < MIN_RUN_INTERVAL) {
+      return;
+    }
     enhanceMediaContainers();
-  }, 150);
+  }, 300);
 }
 
 function init() {
@@ -470,7 +556,15 @@ function init() {
     mutationObserver.disconnect();
   }
   if (typeof MutationObserver !== "undefined") {
-    mutationObserver = new MutationObserver(scheduleEnhancement);
+    mutationObserver = new MutationObserver((mutations) => {
+      for (let i = 0; i < mutations.length; i++) {
+        const target = mutations[i].target;
+        if (!isOwnEnhancementMutation(target)) {
+          scheduleEnhancement(target);
+          return;
+        }
+      }
+    });
     if (document.body) {
       mutationObserver.observe(document.body, {
         childList: true,

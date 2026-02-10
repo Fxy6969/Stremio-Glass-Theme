@@ -1,7 +1,7 @@
 /**
  * @name Dynamic Hero
  * @description Netflix-style rotating hero banner.
- * @version 1.0.1
+ * @version 26.0.1
  * @author Fxy
  */
 
