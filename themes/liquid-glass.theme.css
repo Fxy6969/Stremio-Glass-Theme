@@ -45,6 +45,7 @@ html body {
     overflow-y: scroll !important;
 }
 
+
 /* Portal wrapper created by context-menu-fix plugin */
 .context-menu-portal {
     position: fixed !important;
@@ -323,6 +324,9 @@ html body {
 #app nav[class*="horizontal-nav-bar"] > div[class*="button-container"],
 #app
     nav[class*="horizontal-nav-bar"]
+    > div[class*="button-container"],
+#app
+    nav[class*="horizontal-nav-bar"]
     [class*="buttons-container"]
     > div[class*="button-container"],
 #app
@@ -475,8 +479,7 @@ html body {
     outline: none !important;
 }
 
-.next-video-popup-container-H4wnL
-    .button-container-i4F7t.play-button-Dluk6:hover {
+.next-video-popup-container-H4wnL .button-container-i4F7t.play-button-Dluk6:hover {
     background: var(--overlay-color) !important;
 }
 
@@ -577,10 +580,7 @@ html body {
     min-height: 1.3rem;
 }
 
-.meta-item-container-Tj0Ib
-    .title-bar-container-1Ba0x
-    .menu-label-container-ChuX8
-    .icon-gh1t9 {
+.meta-item-container-Tj0Ib .title-bar-container-1Ba0x .menu-label-container-ChuX8 .icon-gh1t9 {
     visibility: hidden;
 }
 
@@ -588,19 +588,11 @@ html body {
     z-index: 50;
 }
 
-.meta-item-container-Tj0Ib
-    .poster-container-qkw48
-    .new-videos-cwuD9
-    .layer-dQmEe
-    .icon-gh1t9 {
+.meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .icon-gh1t9 {
     color: rgb(157, 157, 157);
 }
 
-.meta-item-container-Tj0Ib
-    .poster-container-qkw48
-    .new-videos-cwuD9
-    .layer-dQmEe
-    .label-ZZ2m7 {
+.meta-item-container-Tj0Ib .poster-container-qkw48 .new-videos-cwuD9 .layer-dQmEe .label-ZZ2m7 {
     color: rgb(157, 157, 157);
 }
 
@@ -1672,15 +1664,8 @@ body.ghost-clicking #heroLoadingScreen {
     transition: opacity 0.25s ease !important;
 }
 
-.library-container-zM_bj
-    .meta-item-container-Tj0Ib
-    .poster-container-qkw48
-    .watched-icon-layer-bi3DO {
-    background: radial-gradient(
-        ellipse at center,
-        rgba(0, 0, 0, 0.3) 0%,
-        rgba(0, 0, 0, 0.5) 100%
-    ) !important;
+.library-container-zM_bj .meta-item-container-Tj0Ib .poster-container-qkw48 .watched-icon-layer-bi3DO {
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
     backdrop-filter: none !important;
 }
 
