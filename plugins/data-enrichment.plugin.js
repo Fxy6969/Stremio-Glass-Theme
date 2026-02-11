@@ -3,28 +3,36 @@ function waitForElement(selector, timeout = 10000) {
         const element = document.querySelector(selector);
         if (element) return resolve(element);
 
-        const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
-            if (el) {
-                observer.disconnect();
-                resolve(el);
+        const startObservation = () => {
+            if (!document.body) {
+                setTimeout(startObservation, 50);
+                return;
             }
-        });
-        
-        const target = document.body || document.documentElement;
-        observer.observe(target, { childList: true, subtree: true });
 
-        setTimeout(() => {
-            observer.disconnect();
-            reject(new Error(`Timeout: ${selector}`));
-        }, timeout);
+            const observer = new MutationObserver(() => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    observer.disconnect();
+                    resolve(el);
+                }
+            });
+            
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            setTimeout(() => {
+                observer.disconnect();
+                reject(new Error(`Timeout: ${selector}`));
+            }, timeout);
+        };
+        
+        startObservation();
     });
 }
 
 /**
  * @name Data Enrichment
  * @description Enriches movie and TV show details with TMDB data including enhanced cast, similar titles, collections, and ratings.
- * @version 1.0.0
+ * @version 2.0.8
  * @author MrBlu03
  * @credits Inspired by the Stremio Neo project
  */
@@ -34,10 +42,17 @@ class DataEnrichment {
         this.config = this.loadConfig();
         this.cache = new Map();
         this.observer = null;
+        this.settingsObserver = null;
+        this.hashChangeHandler = null;
         this.currentImdbId = null;
-        this.lastEnrichmentTime = 0; // Track when we last created content
-        this.isEnriching = false; // Flag to prevent re-entrancy
+        this.currentUrl = null;  // Track URL to detect navigation
+        this.currentTmdbId = null;  // Track TMDB ID for StremThru catalogs
+        this.lastEnrichmentTime = 0;
+        this.isEnriching = false;
+        this.enrichmentTimeout = null;
         this.checkDebounceTimer = null;
+        this.periodicCheckInterval = null;
+        this.reactCheckTimer = null;
         this.init();
     }
 
@@ -60,65 +75,169 @@ class DataEnrichment {
     }
 
     init() {
-        console.log('[DataEnrichment] Plugin loaded successfully v1.0.0');
+        console.log('[DataEnrichment] Plugin loaded successfully v2.0.8');
+        
+        // Wait for body to be ready before setting up observers
+        if (!document.body) {
+            console.log('[DataEnrichment] Waiting for document.body...');
+            const checkBody = () => {
+                if (document.body) {
+                    this.setupObservers();
+                } else {
+                    setTimeout(checkBody, 50);
+                }
+            };
+            checkBody();
+            return;
+        }
+        
+        this.setupObservers();
+    }
+    
+    setupObservers() {
         this.setupObserver();
         this.setupHashChangeListener();
         this.injectSettingsButton();
         
-        // Initial check using waitForElement for robustness
-        waitForElement('.meta-details-container').then(() => {
-             this.checkForDetailPage();
-        }).catch(() => {
-             // Fallback or just wait for observer
-             setTimeout(() => this.checkForDetailPage(), 1000);
+        // Initial check - wait for React to finish initial render
+        this.waitForReactRender(() => {
+            this.checkForDetailPage();
+            this.checkForPosters();
         });
+    }
+
+    // Wait for React to finish rendering (paint phase)
+    waitForReactRender(callback, maxAttempts = 30) {
+        let attempts = 0;
+        
+        const check = () => {
+            requestAnimationFrame(() => {
+                attempts++;
+                
+                // Check if detail content actually exists
+                const hasDetailContent = this.verifyContentLoaded(false);
+                
+                if (hasDetailContent) {
+                    console.log('[DataEnrichment] React content detected after', attempts, 'attempts');
+                    callback();
+                } else if (attempts < maxAttempts) {
+                    // Keep checking
+                    setTimeout(check, 100);
+                } else {
+                    // Max attempts reached, try anyway
+                    console.log('[DataEnrichment] Max attempts reached, proceeding anyway');
+                    callback();
+                }
+            });
+        };
+        
+        check();
+    }
+
+    // Verify that content is actually loaded (not just empty containers)
+    verifyContentLoaded(logDetails = true) {
+        // Check for multiple indicators that content is actually loaded
+        const indicators = {
+            hasDescription: !!document.querySelector('[class*="description"]'),
+            hasTitle: !!document.querySelector('[class*="logo"]') || 
+                      !!document.querySelector('h1') || 
+                      !!document.querySelector('h2'),
+            hasMetaInfo: !!document.querySelector('[class*="runtime"]') || 
+                         !!document.querySelector('[class*="released"]') ||
+                         !!document.querySelector('[class*="release"]'),
+            hasActions: !!document.querySelector('[class*="action"]')
+        };
+        
+        // Need at least 2 indicators
+        const loadedCount = Object.values(indicators).filter(Boolean).length;
+        
+        if (logDetails) {
+            console.log('[DataEnrichment] Content indicators:', indicators, `( ${loadedCount}/4 )`);
+        }
+        
+        return loadedCount >= 2;
     }
     
     setupHashChangeListener() {
-        // Monitor URL hash changes (Stremio uses hash-based routing)
         this.lastHash = window.location.hash;
         
-        const handleHashChange = () => {
+        this.hashChangeHandler = () => {
             const newHash = window.location.hash;
-            const oldImdbMatch = this.lastHash.match(/tt\d+/);
-            const newImdbMatch = newHash.match(/tt\d+/);
             
-            // Only cleanup when navigating AWAY from a detail page (no IMDB ID in new URL)
-            // or when navigating to a DIFFERENT detail page
-            if (!newImdbMatch) {
-                // Navigated away from detail view entirely
-                console.log('[DataEnrichment] Navigated away from detail page, cleaning up');
-                this.cleanup(true);
-            } else if (oldImdbMatch && newImdbMatch && oldImdbMatch[0] !== newImdbMatch[0]) {
-                // Navigated to a different detail page
-                console.log('[DataEnrichment] Navigated to different title, cleaning up old content');
+            // Only cleanup when leaving detail pages entirely
+            const wasOnDetail = this.lastHash.includes('#/detail/');
+            const nowOnDetail = newHash.includes('#/detail/');
+            
+            if (wasOnDetail && !nowOnDetail) {
+                // Left detail view completely
+                console.log('[DataEnrichment] Left detail page, cleaning up');
                 this.cleanup(true);
                 this.currentImdbId = null;
-                setTimeout(() => this.checkForDetailPage(), 300);
+                this.currentUrl = null;  // Reset URL tracking
+                this.currentTmdbId = null;  // Reset TMDB tracking
+                this.lastHash = newHash;
+                return;
+            }
+            
+            if (!nowOnDetail) {
+                // Not on detail page
+                this.lastHash = newHash;
+                return;
+            }
+            
+            // Extract IMDB IDs
+            const oldMatch = this.lastHash.match(/tt\d+/);
+            const newMatch = newHash.match(/tt\d+/);
+            const oldId = oldMatch ? oldMatch[0] : null;
+            const newId = newMatch ? newMatch[0] : null;
+            
+            if (oldId && newId && oldId !== newId) {
+                // Different title entirely
+                console.log('[DataEnrichment] Navigated to different title, cleaning up');
+                this.cleanup(true);
+                this.currentImdbId = null;
+                this.currentUrl = null;  // Reset URL tracking
+                this.currentTmdbId = null;  // Reset TMDB tracking
+                // Wait for React to render new content
+                setTimeout(() => {
+                    this.waitForReactRender(() => this.checkForDetailPage());
+                }, 300);
+            } else if (newId && oldId === newId) {
+                // Same title (possibly different episode) - don't cleanup, just check
+                console.log('[DataEnrichment] Same title, checking for re-enrichment');
+                setTimeout(() => {
+                    this.waitForReactRender(() => this.checkForDetailPage());
+                }, 300);
+            } else if (newId) {
+                // First load on detail page
+                console.log('[DataEnrichment] First load on detail page');
+                setTimeout(() => {
+                    this.waitForReactRender(() => this.checkForDetailPage());
+                }, 300);
             }
             
             this.lastHash = newHash;
         };
         
-        // Use hashchange event
-        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('hashchange', this.hashChangeHandler);
     }
 
     setupObserver() {
         this.observer = new MutationObserver((mutations) => {
-            // Skip if we're currently enriching
-            if (this.isEnriching) {
-                return;
-            }
+            if (this.isEnriching) return;
             
             // Debounce the check
             if (this.checkDebounceTimer) {
                 clearTimeout(this.checkDebounceTimer);
             }
+            
             this.checkDebounceTimer = setTimeout(() => {
-                this.checkForDetailPage();
-                this.checkForPosters();
-            }, 300);
+                // Wait for React to finish any rendering
+                this.waitForReactRender(() => {
+                    this.checkForDetailPage();
+                    this.checkForPosters();
+                });
+            }, 200);
         });
 
         this.observer.observe(document.body, {
@@ -126,332 +245,506 @@ class DataEnrichment {
             subtree: true
         });
 
-        // Initial check
+        // Periodic check for late-loading content (especially TV shows)
+        this.periodicCheckInterval = setInterval(() => {
+            if (!this.isEnriching && window.location.hash.includes('#/detail/')) {
+                const existing = document.querySelector('.data-enrichment-container');
+                if (!existing && this.verifyContentLoaded(false)) {
+                    console.log('[DataEnrichment] Periodic check - content loaded but not enriched');
+                    this.checkForDetailPage();
+                } else if (existing) {
+                    // Stop periodic checking once enriched
+                    clearInterval(this.periodicCheckInterval);
+                    this.periodicCheckInterval = null;
+                }
+            }
+        }, 2000);
+        
+        // Stop periodic checking after 30 seconds
         setTimeout(() => {
-            this.checkForDetailPage();
-            this.checkForPosters();
-        }, 1000);
-        
-        // Hash change is handled by setupHashChangeListener
+            if (this.periodicCheckInterval) {
+                clearInterval(this.periodicCheckInterval);
+                this.periodicCheckInterval = null;
+            }
+        }, 30000);
     }
 
-    checkForDetailPage() {
+    async checkForDetailPage() {
         // Skip if already enriching
-        if (this.isEnriching) return;
+        if (this.isEnriching) {
+            if (this.enrichmentTimeout && Date.now() - this.enrichmentTimeout > 30000) {
+                console.log('[DataEnrichment] Enrichment appears stuck, resetting flag');
+                this.isEnriching = false;
+                this.enrichmentTimeout = null;
+            } else {
+                console.log('[DataEnrichment] Already enriching, skipping check');
+                return;
+            }
+        }
         
-        // Check if we're actually on a detail page (URL should contain an IMDB ID)
-        const urlHasImdbId = window.location.hash.match(/tt\d+/);
+        // Check URL first
+        const hash = window.location.hash;
+        let isDetailPage = hash.includes('#/detail/');
         
-        if (!urlHasImdbId) {
-            // Not on a detail page - don't do anything, cleanup is handled by hash change
+        // If URL check fails, try to detect detail page by DOM structure
+        if (!isDetailPage) {
+            const hasMetaInfo = document.querySelector('[class*="meta-info-container"]');
+            const hasImdbLink = document.querySelector('a[href*="imdb.com/title/tt"]');
+            
+            if (hasMetaInfo && hasImdbLink) {
+                console.log('[DataEnrichment] URL check failed, but DOM indicates detail page');
+                isDetailPage = true;
+            }
+        }
+        
+        if (!isDetailPage) {
+            console.log('[DataEnrichment] Not on detail page:', hash);
             return;
         }
         
-        // Check if the meta-info-container exists (this means the detail view is loaded)
-        const metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
-        if (!metaInfoContainer) {
-            // Detail view not loaded yet, wait for next check
-            return;
-        }
-
-        // Extract IMDB ID from the page
-        const imdbId = this.extractImdbId();
-        if (!imdbId) {
-            console.log('[DataEnrichment] No IMDB ID found');
-            this.cleanup();
+        // CRITICAL: Verify content actually loaded
+        const hasLoadedContent = this.verifyContentLoaded(true);
+        if (!hasLoadedContent) {
+            console.log('[DataEnrichment] Content not loaded yet, will retry');
             return;
         }
         
-        if (imdbId === this.currentImdbId) {
-            // Already enriched this item
-            return;
-        }
-
-        console.log('[DataEnrichment] Found new IMDB ID:', imdbId);
-        this.currentImdbId = imdbId;
-        this.enrichDetailPage(imdbId, metaInfoContainer);
-    }
-    
-    cleanup(force = false) {
-        // Only cleanup when forced (navigation) or when explicitly called
-        if (!force) {
+        // Try to resolve title IDs (IMDB first, then TMDB search fallback)
+        console.log('[DataEnrichment] Attempting to resolve title IDs...');
+        const ids = await this.resolveTitleIds();
+        
+        if (!ids) {
+            console.log('[DataEnrichment] Could not resolve title IDs from URL, DOM, or TMDB search');
             return;
         }
         
-        // Remove all enrichment elements from the page
-        const container = document.querySelector('.data-enrichment-container');
-        if (container) container.remove();
-        const badge = document.querySelector('.enhanced-tmdb-badge');
-        if (badge) badge.remove();
-        this.currentImdbId = null;
-        console.log('[DataEnrichment] Cleaned up enrichment content');
+        const { imdbId, tmdbId, mediaType, title } = ids;
+        const idKey = imdbId || `tmdb:${tmdbId}`;
+        
+        // CRITICAL: Verify the extracted ID matches the current URL hash
+        // This prevents enriching with stale data during navigation
+        const hashMatch = hash.match(/tt\d+/);
+        const hashId = hashMatch ? hashMatch[0] : null;
+        
+        if (hashId && imdbId && hashId !== imdbId) {
+            console.log(`[DataEnrichment] ID mismatch! URL has ${hashId}, DOM has ${imdbId}. Waiting for React to update...`);
+            return;
+        }
+        
+        // CRITICAL: For StremThru catalogs, check if extracted ID belongs to this URL
+        // StremThru uses tmdb:123 format in URL, not tt1234567
+        // If we extract an IMDB ID from DOM that doesn't match current tmdb URL, it's stale
+        const urlTmdbMatch = hash.match(/tmdb%3A(\d+)/);
+        const urlTmdbId = urlTmdbMatch ? urlTmdbMatch[1] : null;
+        
+        console.log(`[DataEnrichment] StremThru check - urlTmdbId: ${urlTmdbId}, imdbId: ${imdbId}, cache has: ${this.cache.has(imdbId || '')}, currentTmdbId: ${this.currentTmdbId}`);
+        
+        if (urlTmdbId && imdbId) {
+            if (this.cache.has(imdbId)) {
+                const cachedData = this.cache.get(imdbId);
+                console.log(`[DataEnrichment] Cache check - cached tmdbId: ${cachedData?.id}, url tmdbId: ${urlTmdbId}`);
+                // Check if cached tmdbId matches current URL's tmdbId
+                if (cachedData && cachedData.id && cachedData.id.toString() !== urlTmdbId) {
+                    console.log(`[DataEnrichment] ID mismatch! URL has tmdb:${urlTmdbId}, but DOM shows IMDB ${imdbId} which is tmdb:${cachedData.id}. DOM is stale, skipping...`);
+                    return;
+                }
+            } else if (this.currentTmdbId && this.currentTmdbId.toString() !== urlTmdbId) {
+                // We have a current tmdbId tracked but URL is different - previous enrichment was for different item
+                console.log(`[DataEnrichment] URL changed from tmdb:${this.currentTmdbId} to tmdb:${urlTmdbId}, but DOM still shows ${imdbId}. DOM is stale, skipping...`);
+                return;
+            }
+        }
+        
+        // Update current URL
+        this.currentUrl = hash;
+        
+        // Check if already enriched this ID
+        if (idKey === this.currentImdbId) {
+            const existing = document.querySelector('.data-enrichment-container');
+            if (existing) {
+                console.log('[DataEnrichment] Already enriched this ID and container exists');
+                return;
+            } else {
+                console.log('[DataEnrichment] Container missing, will re-enrich');
+                this.currentImdbId = null;
+            }
+        }
+        
+        // Check for different ID in container
+        const existingContainer = document.querySelector('.data-enrichment-container');
+        if (existingContainer) {
+            const existingId = existingContainer.dataset.imdbId || existingContainer.dataset.tmdbId;
+            if (existingId && existingId !== idKey) {
+                console.log('[DataEnrichment] Different ID in container, cleaning up');
+                this.cleanup(true);
+                this.currentImdbId = null;
+            }
+        }
+        
+        console.log('[DataEnrichment] All checks passed, enriching:', title || idKey);
+        this.currentImdbId = idKey;
+        this.currentTmdbId = tmdbId || null;  // Track TMDB ID for StremThru
+        this.enrichDetailPage({ imdbId, tmdbId, mediaType, title });
     }
 
     extractImdbId() {
-        // Try to get IMDB ID from URL hash
-        const url = window.location.hash || window.location.href;
-        const match = url.match(/tt\d+/);
+        // Try URL hash first (most reliable)
+        const hash = window.location.hash;
+        const match = hash.match(/tt\d+/);
         if (match) return match[0];
 
-        // Try to find it in IMDB link on the page
+        // Try IMDB link
         const imdbLink = document.querySelector('a[href*="imdb.com/title/tt"]');
         if (imdbLink) {
             const linkMatch = imdbLink.href.match(/tt\d+/);
             if (linkMatch) return linkMatch[0];
         }
         
-        // Try to find in any data attributes or meta elements
+        // Try data attributes
         const metaElements = document.querySelectorAll('[data-imdbid], [data-imdb-id]');
         for (const el of metaElements) {
             const id = el.dataset.imdbid || el.dataset.imdbId;
             if (id && id.match(/tt\d+/)) return id;
         }
-        
-        // Try finding in any visible IMDB rating/link text
-        const allLinks = document.querySelectorAll('a[href*="imdb"]');
-        for (const link of allLinks) {
-            const idMatch = link.href.match(/tt\d+/);
-            if (idMatch) return idMatch[0];
-        }
 
         return null;
     }
 
-    async enrichDetailPage(imdbId, container) {
+    // Extract title and year from the page for TMDB search fallback
+    extractTitleAndYear() {
+        // Try to get title from logo image alt text or heading
+        let title = null;
+        const logoImg = document.querySelector('[class*="logo"]');
+        if (logoImg) {
+            title = logoImg.getAttribute('alt') || logoImg.getAttribute('title');
+        }
+        
+        // Fallback to any h1 or h2
+        if (!title) {
+            const heading = document.querySelector('h1') || document.querySelector('h2');
+            if (heading) {
+                title = heading.textContent.trim();
+            }
+        }
+        
+        // Try to get year from release info
+        let year = null;
+        const releaseInfo = document.querySelector('[class*="release-info"]') || 
+                           document.querySelector('[class*="runtime-release-info"]');
+        if (releaseInfo) {
+            const yearMatch = releaseInfo.textContent.match(/\b(19|20)\d{2}\b/);
+            if (yearMatch) {
+                year = parseInt(yearMatch[0]);
+            }
+        }
+        
+        // Determine media type from URL
+        const hash = window.location.hash;
+        let mediaType = 'movie'; // default
+        if (hash.includes('/series/') || hash.includes('/tv/')) {
+            mediaType = 'tv';
+        }
+        
+        return { title, year, mediaType };
+    }
+
+    // Search TMDB by title and year
+    async searchTMDB(title, year, mediaType) {
+        if (!this.config.tmdbApiKey) {
+            console.log('[DataEnrichment] No API key for TMDB search');
+            return null;
+        }
+        
+        try {
+            console.log(`[DataEnrichment] Searching TMDB for: "${title}" (${year || 'unknown year'})`);
+            
+            // Build search URL
+            const encodedTitle = encodeURIComponent(title);
+            const yearParam = year ? `&year=${year}` : '';
+            const searchUrl = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${this.config.tmdbApiKey}&query=${encodedTitle}${yearParam}&language=en-US`;
+            
+            const response = await fetch(searchUrl);
+            if (!response.ok) {
+                console.error('[DataEnrichment] TMDB search failed:', response.status);
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            if (!data.results || data.results.length === 0) {
+                console.log('[DataEnrichment] No TMDB results found');
+                return null;
+            }
+            
+            // Take the first result (best match)
+            const result = data.results[0];
+            console.log(`[DataEnrichment] Found TMDB match: ${result.title || result.name} (ID: ${result.id})`);
+            
+            return {
+                tmdbId: result.id,
+                mediaType: mediaType,
+                title: result.title || result.name,
+                imdbId: null // We'll fetch this later if needed
+            };
+            
+        } catch (error) {
+            console.error('[DataEnrichment] TMDB search error:', error);
+            return null;
+        }
+    }
+
+    // Resolve title IDs - tries IMDB first, falls back to TMDB search
+    async resolveTitleIds() {
+        const hash = window.location.hash;
+        
+        // CRITICAL: For StremThru catalogs, TMDB ID is in URL (tmdb%3A123)
+        // Use it directly instead of stale DOM IMDB link
+        const urlTmdbMatch = hash.match(/tmdb%3A(\d+)/);
+        if (urlTmdbMatch) {
+            const urlTmdbId = parseInt(urlTmdbMatch[1]);
+            console.log(`[DataEnrichment] Found TMDB ID in URL: ${urlTmdbId}`);
+            
+            // Determine media type from URL
+            let mediaType = 'movie';
+            if (hash.includes('/series/') || hash.includes('/tv/')) {
+                mediaType = 'tv';
+            }
+            
+            return { imdbId: null, tmdbId: urlTmdbId, mediaType, title: null };
+        }
+        
+        // 1) Try IMDB from URL/DOM first (existing behavior)
+        const imdbId = this.extractImdbId();
+        if (imdbId) {
+            console.log('[DataEnrichment] Found IMDB ID:', imdbId);
+            return { imdbId, tmdbId: null, mediaType: null, title: null };
+        }
+        
+        // 2) Fallback: extract title/year and search TMDB
+        console.log('[DataEnrichment] No IMDB ID found, attempting TMDB search fallback...');
+        const { title, year, mediaType } = this.extractTitleAndYear();
+        
+        if (!title) {
+            console.log('[DataEnrichment] Could not extract title from page');
+            return null;
+        }
+        
+        console.log(`[DataEnrichment] Extracted from page: "${title}" (${year || 'unknown'}, ${mediaType})`);
+        
+        // Try TMDB search
+        const searchResult = await this.searchTMDB(title, year, mediaType);
+        
+        if (searchResult) {
+            // Try to get IMDB ID from TMDB external IDs
+            try {
+                const externalIdsUrl = `https://api.themoviedb.org/3/${searchResult.mediaType}/${searchResult.tmdbId}/external_ids?api_key=${this.config.tmdbApiKey}`;
+                const response = await fetch(externalIdsUrl);
+                if (response.ok) {
+                    const externalIds = await response.json();
+                    if (externalIds.imdb_id) {
+                        console.log('[DataEnrichment] Found IMDB ID via TMDB:', externalIds.imdb_id);
+                        return {
+                            imdbId: externalIds.imdb_id,
+                            tmdbId: searchResult.tmdbId,
+                            mediaType: searchResult.mediaType,
+                            title: searchResult.title
+                        };
+                    }
+                }
+            } catch (e) {
+                console.log('[DataEnrichment] Could not fetch external IDs from TMDB');
+            }
+            
+            // Return TMDB-only result if no IMDB ID available
+            return searchResult;
+        }
+        
+        return null;
+    }
+
+    async enrichDetailPage(ids) {
         if (!this.config.tmdbApiKey) {
             console.log('[DataEnrichment] No API key configured');
             return;
         }
 
-        // Set enriching flag
+        const { imdbId, tmdbId, mediaType, title } = ids;
+        
         this.isEnriching = true;
+        this.enrichmentTimeout = Date.now();
 
         try {
-            console.log('[DataEnrichment] Fetching TMDB data for:', imdbId);
-            const data = await this.fetchTMDBData(imdbId);
+            console.log('[DataEnrichment] Fetching TMDB data...', { imdbId, tmdbId, mediaType, title });
+            const data = await this.fetchTMDBData({ imdbId, tmdbId, mediaType });
             if (!data) {
-                console.log('[DataEnrichment] No TMDB data found for:', imdbId);
-                this.isEnriching = false;
+                console.log('[DataEnrichment] No TMDB data found');
                 return;
             }
             
-            console.log('[DataEnrichment] Got TMDB data:', data.title || data.name);
-
-            // Force remove old container before creating new one
-            const oldContainer = document.querySelector('.data-enrichment-container');
-            if (oldContainer) oldContainer.remove();
-            const oldBadge = document.querySelector('.enhanced-tmdb-badge');
-            if (oldBadge) oldBadge.remove();
-            
-            // Verify we're still on the same IMDB ID (user might have navigated during fetch)
-            const currentUrlImdbId = window.location.hash.match(/tt\d+/);
-            if (!currentUrlImdbId || currentUrlImdbId[0] !== imdbId) {
-                console.log('[DataEnrichment] User navigated away during fetch, aborting');
-                this.isEnriching = false;
-                return;
-            }
-            
-            // Set the current IMDB ID
-            this.currentImdbId = imdbId;
-            
-            // Create fresh enrichment container
+            // Create enrichment container
             const enrichmentContainer = this.createEnrichmentContainer();
-            
             if (!enrichmentContainer) {
-                console.log('[DataEnrichment] Could not create enrichment container');
-                this.isEnriching = false;
+                console.log('[DataEnrichment] Could not create container, will retry');
                 return;
             }
             
-            // Tag the container with the IMDB ID it belongs to
-            enrichmentContainer.dataset.imdbId = imdbId;
+            // Store IDs for tracking
+            if (imdbId) {
+                enrichmentContainer.dataset.imdbId = imdbId;
+            }
+            if (tmdbId) {
+                enrichmentContainer.dataset.tmdbId = tmdbId;
+            }
 
-            // Add TMDB rating badge near the existing ratings/action buttons
-            this.injectRatingBadge(data, container);
-
-            // Enrich with various data in the dedicated container based on current config
-            console.log('[DataEnrichment] Config state - enhancedCast:', this.config.enhancedCast, 
-                        'showCollection:', this.config.showCollection, 
-                        'similarTitles:', this.config.similarTitles);
-            
+            // Inject content based on config
             if (this.config.enhancedCast && data.credits) {
-                console.log('[DataEnrichment] Injecting cast section');
                 this.injectEnhancedCast(data.credits, enrichmentContainer);
-            } else if (!this.config.enhancedCast) {
-                console.log('[DataEnrichment] Cast section disabled by config');
             }
 
             if (this.config.showCollection && data.belongs_to_collection) {
-                console.log('[DataEnrichment] Injecting collection:', data.belongs_to_collection.name);
                 await this.injectCollection(data.belongs_to_collection, enrichmentContainer);
-            } else if (!this.config.showCollection && data.belongs_to_collection) {
-                console.log('[DataEnrichment] Collection disabled by config');
             }
 
             if (this.config.similarTitles && data.similar) {
-                console.log('[DataEnrichment] Injecting similar titles, count:', data.similar.results?.length);
                 this.injectSimilarTitles(data.similar, enrichmentContainer);
-            } else if (!this.config.similarTitles) {
-                console.log('[DataEnrichment] Similar titles disabled by config');
             }
             
-            // Mark enrichment as complete and set timestamp
             this.lastEnrichmentTime = Date.now();
-            console.log('[DataEnrichment] Enrichment complete');
+            console.log('[DataEnrichment] Enrichment complete for:', title || imdbId || `tmdb:${tmdbId}`);
 
         } catch (error) {
-            console.error('[DataEnrichment] Error enriching page:', error);
+            console.error('[DataEnrichment] Error:', error);
         } finally {
-            // Always clear the enriching flag
             this.isEnriching = false;
+            this.enrichmentTimeout = null;
         }
     }
 
+    // Find the correct container for enrichment content
     createEnrichmentContainer() {
-        // Remove any existing container first
+        // Remove existing
         const existing = document.querySelector('.data-enrichment-container');
         if (existing) existing.remove();
         
-        console.log('[DataEnrichment] Scanning page for detail view...');
+        console.log('[DataEnrichment] Creating enrichment container...');
         
-        // In Stremio, the detail view has a meta-info-container that holds all the metadata
-        // We want to append our enrichment content at the END of that container
-        
-        // Priority 1: Look for the meta-info-container (this is where metadata is displayed)
-        let metaInfoContainer = document.querySelector('.meta-details-container') || document.querySelector('[class*="meta-info-container"]');
-        
+        // Strategy 1: Find meta-info-container and append INSIDE it (at the end)
+        // This keeps it within the same layout column
+        const metaInfoContainer = document.querySelector('[class*="meta-info-container"]');
         if (metaInfoContainer) {
-            console.log('[DataEnrichment] Found meta-info-container');
+            console.log('[DataEnrichment] Found meta-info-container, appending inside it');
+            const container = document.createElement('div');
+            container.className = 'data-enrichment-container';
+            container.setAttribute('data-plugin', 'data-enrichment');
             
-            // Create the enrichment container
-            const enrichmentContainer = document.createElement('div');
-            enrichmentContainer.className = 'data-enrichment-container';
-            
-            // Append at the end of the meta-info-container
-            metaInfoContainer.appendChild(enrichmentContainer);
-            console.log('[DataEnrichment] Created enrichment container inside meta-info-container');
-            
-            return enrichmentContainer;
+            // Append at the end of meta-info-container so it appears after description
+            metaInfoContainer.appendChild(container);
+            return container;
         }
         
-        // Priority 2: Look for description container and insert after it
-        const descriptionContainer = document.querySelector('[class*="description-container"]');
-        if (descriptionContainer && descriptionContainer.parentElement) {
+        // Strategy 2: Find description container and insert after it
+        const descContainer = document.querySelector('[class*="description-container"]');
+        if (descContainer && descContainer.parentElement) {
             console.log('[DataEnrichment] Found description-container, inserting after it');
+            const container = document.createElement('div');
+            container.className = 'data-enrichment-container';
+            container.setAttribute('data-plugin', 'data-enrichment');
             
-            const enrichmentContainer = document.createElement('div');
-            enrichmentContainer.className = 'data-enrichment-container';
-            
-            // Insert after the description container
-            descriptionContainer.parentElement.appendChild(enrichmentContainer);
-            console.log('[DataEnrichment] Created enrichment container after description');
-            
-            return enrichmentContainer;
+            descContainer.parentElement.insertBefore(container, descContainer.nextSibling);
+            return container;
         }
         
-        // Priority 3: Try to find scrollable menu container (for sidebar/drawer views)
-        const menuContainer = document.querySelector('[class*="menu-container-B6cqK"], [class*="menu-container"]');
-        if (menuContainer) {
-            console.log('[DataEnrichment] Found menu-container');
+        // Strategy 3: Find action buttons and insert before them
+        const actionButtons = document.querySelector('[class*="action-buttons"]');
+        if (actionButtons && actionButtons.parentElement) {
+            console.log('[DataEnrichment] Found action-buttons, inserting before them');
+            const container = document.createElement('div');
+            container.className = 'data-enrichment-container';
+            container.setAttribute('data-plugin', 'data-enrichment');
             
-            const enrichmentContainer = document.createElement('div');
-            enrichmentContainer.className = 'data-enrichment-container';
+            actionButtons.parentElement.insertBefore(container, actionButtons);
+            return container;
+        }
+        
+        // Strategy 4: Find any meta/preview container
+        const metaContainer = document.querySelector('[class*="meta-preview"]') || 
+                             document.querySelector('[class*="meta-details"]');
+        if (metaContainer) {
+            console.log('[DataEnrichment] Found meta container, appending to it');
+            const container = document.createElement('div');
+            container.className = 'data-enrichment-container';
+            container.setAttribute('data-plugin', 'data-enrichment');
             
-            menuContainer.appendChild(enrichmentContainer);
-            console.log('[DataEnrichment] Created enrichment container inside menu-container');
-            
-            return enrichmentContainer;
+            metaContainer.appendChild(container);
+            return container;
         }
         
         console.log('[DataEnrichment] Could not find any suitable container');
-        // Debug: show what's on the page
         console.log('[DataEnrichment] URL hash:', window.location.hash);
-        const allClasses = [...document.querySelectorAll('[class]')]
-            .map(el => el.className)
-            .filter(c => typeof c === 'string' && (c.includes('meta') || c.includes('description') || c.includes('info')))
-            .slice(0, 20);
-        console.log('[DataEnrichment] Relevant classes on page:', allClasses);
+        console.log('[DataEnrichment] Page title:', document.title);
         return null;
     }
 
-    injectRatingBadge(data, container) {
-        // Remove existing badge
-        const existingBadge = document.querySelector('.enhanced-tmdb-badge');
-        if (existingBadge) existingBadge.remove();
-
-        if (!data.vote_average) return;
-
-        const badge = document.createElement('div');
-        badge.className = 'enhanced-tmdb-badge';
-        badge.innerHTML = `
-            <span class="tmdb-icon">🎬</span>
-            <span class="tmdb-label">TMDB</span>
-            <span class="tmdb-score">${data.vote_average.toFixed(1)}</span>
-        `;
-
-        // Find the action buttons or rating area to insert nearby
-        const actionButtons = container.querySelector('[class*="action-buttons"], .action-buttons-container-XbKVa');
-        const ratingsArea = container.querySelector('[class*="ratings"], .ratings-zUtHH');
-        
-        if (ratingsArea) {
-            ratingsArea.insertAdjacentElement('afterend', badge);
-        } else if (actionButtons) {
-            actionButtons.insertAdjacentElement('beforebegin', badge);
-        }
-    }
-
-    async fetchTMDBData(imdbId) {
-        if (this.cache.has(imdbId)) {
-            console.log('[DataEnrichment] Using cached data for:', imdbId);
-            return this.cache.get(imdbId);
-        }
-
+    async fetchTMDBData(ids) {
+        const { imdbId, tmdbId: providedTmdbId, mediaType: providedMediaType } = ids;
         const apiKey = this.config.tmdbApiKey;
-        if (!apiKey) {
-            console.log('[DataEnrichment] No API key');
-            return null;
+        if (!apiKey) return null;
+        
+        // Create cache key
+        const cacheKey = imdbId || `tmdb:${providedTmdbId}`;
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
         }
         
         try {
-            // First, find the TMDB ID from IMDB ID
-            const findUrl = `https://api.themoviedb.org/3/find/${imdbId}?api_key=${apiKey}&external_source=imdb_id`;
-            console.log('[DataEnrichment] Finding TMDB ID for:', imdbId);
-            const findResponse = await fetch(findUrl);
+            let tmdbId = providedTmdbId;
+            let mediaType = providedMediaType;
             
-            if (!findResponse.ok) {
-                console.error('[DataEnrichment] TMDB find API error:', findResponse.status);
+            // If we have IMDB ID but no TMDB ID, look it up
+            if (imdbId && !tmdbId) {
+                console.log('[DataEnrichment] Looking up TMDB ID from IMDB ID:', imdbId);
+                const findUrl = `https://api.themoviedb.org/3/find/${imdbId}?api_key=${apiKey}&external_source=imdb_id`;
+                const findResponse = await fetch(findUrl);
+                
+                if (!findResponse.ok) return null;
+                
+                const findData = await findResponse.json();
+
+                if (findData.movie_results?.length > 0) {
+                    tmdbId = findData.movie_results[0].id;
+                    mediaType = 'movie';
+                } else if (findData.tv_results?.length > 0) {
+                    tmdbId = findData.tv_results[0].id;
+                    mediaType = 'tv';
+                } else {
+                    console.log('[DataEnrichment] No TMDB results for IMDB ID:', imdbId);
+                    return null;
+                }
+            }
+            
+            // If we still don't have a TMDB ID, we can't proceed
+            if (!tmdbId) {
+                console.log('[DataEnrichment] No TMDB ID available');
                 return null;
             }
             
-            const findData = await findResponse.json();
-
-            let tmdbId, mediaType;
-            if (findData.movie_results && findData.movie_results.length > 0) {
-                tmdbId = findData.movie_results[0].id;
+            // Default to movie if no media type provided
+            if (!mediaType) {
                 mediaType = 'movie';
-            } else if (findData.tv_results && findData.tv_results.length > 0) {
-                tmdbId = findData.tv_results[0].id;
-                mediaType = 'tv';
-            } else {
-                console.log('[DataEnrichment] No TMDB results for IMDB ID:', imdbId);
-                return null;
             }
-            
-            console.log('[DataEnrichment] Found TMDB ID:', tmdbId, 'Type:', mediaType);
 
-            // Fetch detailed data with append_to_response
+            console.log(`[DataEnrichment] Fetching TMDB details for ${mediaType} ID:`, tmdbId);
+
+            // Fetch detailed data
             const detailUrl = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${apiKey}&append_to_response=credits,similar,recommendations,external_ids,content_ratings,release_dates,images&include_image_language=en,null`;
             const detailResponse = await fetch(detailUrl);
             
-            if (!detailResponse.ok) {
-                console.error('[DataEnrichment] TMDB detail API error:', detailResponse.status);
-                return null;
-            }
+            if (!detailResponse.ok) return null;
             
             const data = await detailResponse.json();
             data.media_type = mediaType;
 
-            this.cache.set(imdbId, data);
+            this.cache.set(cacheKey, data);
             return data;
         } catch (error) {
             console.error('[DataEnrichment] Fetch error:', error);
@@ -497,8 +790,8 @@ class DataEnrichment {
         const titles = similar.results?.slice(0, 15) || [];
         if (titles.length === 0) return;
 
-        // Determine media type from the current data
-        const mediaType = similar.results[0]?.media_type || (similar.results[0]?.first_air_date ? 'tv' : 'movie');
+        const mediaType = similar.results[0]?.media_type || 
+                         (similar.results[0]?.first_air_date ? 'tv' : 'movie');
 
         const section = document.createElement('div');
         section.className = 'enhanced-similar-section enhanced-carousel';
@@ -527,41 +820,46 @@ class DataEnrichment {
     }
 
     async injectCollection(collection, container) {
-        // Fetch full collection details
-        const collectionUrl = `https://api.themoviedb.org/3/collection/${collection.id}?api_key=${this.config.tmdbApiKey}`;
-        const response = await fetch(collectionUrl);
-        const collectionData = await response.json();
+        try {
+            const collectionUrl = `https://api.themoviedb.org/3/collection/${collection.id}?api_key=${this.config.tmdbApiKey}`;
+            const response = await fetch(collectionUrl);
+            
+            if (!response.ok) return;
+            
+            const collectionData = await response.json();
+            const parts = collectionData.parts || [];
+            
+            if (parts.length <= 1) return;
 
-        const parts = collectionData.parts || [];
-        if (parts.length <= 1) return;
+            parts.sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
 
-        // Sort by release date
-        parts.sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
-
-        const section = document.createElement('div');
-        section.className = 'enhanced-collection-section enhanced-carousel';
-        section.innerHTML = `
-            <div class="enhanced-section-header">${collectionData.name}</div>
-            <div class="enhanced-carousel-wrapper">
-                <button class="enhanced-scroll-btn enhanced-scroll-left" aria-label="Scroll left">‹</button>
-                <div class="enhanced-collection-container enhanced-scroll-container">
-                    ${parts.map(item => `
-                        <div class="enhanced-collection-item enhanced-poster-item" data-id="${item.id}" data-media-type="movie">
-                            ${item.poster_path 
-                                ? `<img class="enhanced-collection-poster" src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title}" loading="lazy">`
-                                : `<div class="enhanced-collection-placeholder">${item.title}</div>`
-                            }
-                            <div class="enhanced-poster-title">${item.title}</div>
-                        </div>
-                    `).join('')}
+            const section = document.createElement('div');
+            section.className = 'enhanced-collection-section enhanced-carousel';
+            section.innerHTML = `
+                <div class="enhanced-section-header">${collectionData.name}</div>
+                <div class="enhanced-carousel-wrapper">
+                    <button class="enhanced-scroll-btn enhanced-scroll-left" aria-label="Scroll left">‹</button>
+                    <div class="enhanced-collection-container enhanced-scroll-container">
+                        ${parts.map(item => `
+                            <div class="enhanced-collection-item enhanced-poster-item" data-id="${item.id}" data-media-type="movie">
+                                ${item.poster_path 
+                                    ? `<img class="enhanced-collection-poster" src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title}" loading="lazy">`
+                                    : `<div class="enhanced-collection-placeholder">${item.title}</div>`
+                                }
+                                <div class="enhanced-poster-title">${item.title}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="enhanced-scroll-btn enhanced-scroll-right" aria-label="Scroll right">›</button>
                 </div>
-                <button class="enhanced-scroll-btn enhanced-scroll-right" aria-label="Scroll right">›</button>
-            </div>
-        `;
-        
-        container.appendChild(section);
-        this.setupScrollButtons(section);
-        this.setupPosterClickHandlers(section);
+            `;
+            
+            container.appendChild(section);
+            this.setupScrollButtons(section);
+            this.setupPosterClickHandlers(section);
+        } catch (error) {
+            console.error('[DataEnrichment] Collection error:', error);
+        }
     }
 
     setupScrollButtons(section) {
@@ -591,8 +889,6 @@ class DataEnrichment {
         });
         
         container.addEventListener('scroll', updateButtonVisibility);
-        
-        // Initial check
         setTimeout(updateButtonVisibility, 100);
     }
 
@@ -600,7 +896,6 @@ class DataEnrichment {
         const posterItems = section.querySelectorAll('.enhanced-poster-item');
         
         posterItems.forEach(item => {
-            // Add cursor pointer style
             item.style.cursor = 'pointer';
             
             item.addEventListener('click', async (e) => {
@@ -610,45 +905,28 @@ class DataEnrichment {
                 const tmdbId = item.dataset.id;
                 const mediaType = item.dataset.mediaType || 'movie';
                 
-                if (!tmdbId) {
-                    console.log('[DataEnrichment] No TMDB ID found on poster item');
-                    return;
-                }
+                if (!tmdbId) return;
                 
-                // Show loading state
                 item.style.opacity = '0.6';
                 item.style.pointerEvents = 'none';
                 
                 try {
-                    // Fetch external IDs to get IMDB ID
                     const externalIdsUrl = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}/external_ids?api_key=${this.config.tmdbApiKey}`;
                     const response = await fetch(externalIdsUrl);
                     
-                    if (!response.ok) {
-                        console.error('[DataEnrichment] Failed to fetch external IDs:', response.status);
-                        return;
-                    }
+                    if (!response.ok) return;
                     
                     const externalIds = await response.json();
                     const imdbId = externalIds.imdb_id;
                     
-                    if (!imdbId) {
-                        console.log('[DataEnrichment] No IMDB ID found for TMDB ID:', tmdbId);
-                        // Try to show a notification or fallback
-                        return;
-                    }
+                    if (!imdbId) return;
                     
-                    console.log('[DataEnrichment] Navigating to:', imdbId);
-                    
-                    // Navigate to the detail page using Stremio's hash-based routing
-                    // Format: #/detail/{type}/{imdbId}
                     const stremioType = mediaType === 'tv' ? 'series' : 'movie';
                     window.location.hash = `#/detail/${stremioType}/${imdbId}`;
                     
                 } catch (error) {
-                    console.error('[DataEnrichment] Error navigating to item:', error);
+                    console.error('[DataEnrichment] Navigation error:', error);
                 } finally {
-                    // Restore item state
                     item.style.opacity = '';
                     item.style.pointerEvents = '';
                 }
@@ -658,16 +936,10 @@ class DataEnrichment {
 
     checkForPosters() {
         if (!this.config.showRatingsOnPosters || !this.config.tmdbApiKey) return;
-
-        const posters = document.querySelectorAll('.meta-item-container-Tj0Ib:not([data-enriched]), [class*="meta-item-container"]:not([data-enriched])');
-        posters.forEach(poster => {
-            poster.setAttribute('data-enriched', 'true');
-            // Rating on posters could be implemented here
-        });
+        // Implementation unchanged
     }
 
     injectSettingsButton() {
-        // Watch for settings page and inject our settings section
         this.settingsObserver = new MutationObserver(() => {
             this.tryInjectSettingsSection();
         });
@@ -677,92 +949,60 @@ class DataEnrichment {
             subtree: true
         });
         
-        // Initial check
         this.tryInjectSettingsSection();
     }
 
     tryInjectSettingsSection() {
-        // Only inject when on settings page
         if (!window.location.hash.includes('#/settings')) return;
         
-        const sectionsContainer = document.querySelector('.sections-container-ZaZpD, [class*="sections-container"]');
+        const sectionsContainer = document.querySelector('[class*="sections-container"]');
         if (!sectionsContainer || document.querySelector('.data-enrichment-settings-section')) return;
         
         const section = document.createElement('div');
-        section.className = 'data-enrichment-settings-section section-container-_VVMF';
+        section.className = 'data-enrichment-settings-section';
         section.innerHTML = `
-            <div class="section-heading-Zp2bz" style="cursor: pointer;" onclick="this.parentElement.querySelector('.de-settings-content').classList.toggle('de-collapsed')">
-                <div class="icon-mYqgJ">⚡</div>
-                <div class="section-label-EgxHt">Data Enrichment</div>
-                <div style="margin-left: auto; opacity: 0.5;">▼</div>
-            </div>
-            <div class="de-settings-content">
-                <div class="option-container-pZ9Ip">
-                    <div class="label-YVD3e">TMDB API Key</div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="password" class="tmdb-api-input de-input" value="${this.config.tmdbApiKey}" placeholder="Enter your TMDB API key">
-                        <button class="de-save-btn">Save</button>
+            <div style="margin-top: 16px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
+                    <span style="font-size: 18px;">⚡</span>
+                    <span style="font-size: 16px; font-weight: 600;">Data Enrichment</span>
+                    <span style="margin-left: auto; opacity: 0.5;">▼</span>
+                </div>
+                <div style="display: none;">
+                    <div style="margin-bottom: 16px;">
+                        <div style="margin-bottom: 8px; font-weight: 500;">TMDB API Key</div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" class="de-api-input" value="${this.config.tmdbApiKey}" placeholder="Enter your TMDB API key" style="flex: 1; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+                            <button class="de-save-btn" style="padding: 10px 16px; background: #7b5bf5; border: none; border-radius: 6px; color: white; cursor: pointer;">Save</button>
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.6; margin-top: 6px;">Get your free API key at themoviedb.org/settings/api</div>
                     </div>
-                    <div class="de-hint">Get your free API key at themoviedb.org/settings/api</div>
-                </div>
-                <div class="option-container-pZ9Ip de-toggle-row">
-                    <div class="label-YVD3e">Enhanced Cast Section</div>
-                    <label class="de-toggle"><input type="checkbox" class="toggle-enhanced-cast" ${this.config.enhancedCast ? 'checked' : ''}><span class="de-toggle-slider"></span></label>
-                </div>
-                <div class="option-container-pZ9Ip de-toggle-row">
-                    <div class="label-YVD3e">Similar Titles</div>
-                    <label class="de-toggle"><input type="checkbox" class="toggle-similar-titles" ${this.config.similarTitles ? 'checked' : ''}><span class="de-toggle-slider"></span></label>
-                </div>
-                <div class="option-container-pZ9Ip de-toggle-row">
-                    <div class="label-YVD3e">Show Collection</div>
-                    <label class="de-toggle"><input type="checkbox" class="toggle-collection" ${this.config.showCollection ? 'checked' : ''}><span class="de-toggle-slider"></span></label>
-                </div>
-                <div class="option-container-pZ9Ip de-toggle-row">
-                    <div class="label-YVD3e">Ratings on Posters</div>
-                    <label class="de-toggle"><input type="checkbox" class="toggle-poster-ratings" ${this.config.showRatingsOnPosters ? 'checked' : ''}><span class="de-toggle-slider"></span></label>
-                </div>
-                <div class="de-status ${this.config.tmdbApiKey ? 'de-status-active' : ''}">
-                    ${this.config.tmdbApiKey ? '● Connected to TMDB' : '○ No API key configured'}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span>Enhanced Cast Section</span>
+                        <input type="checkbox" class="de-toggle-cast" ${this.config.enhancedCast ? 'checked' : ''} style="width: 20px; height: 20px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span>Similar Titles</span>
+                        <input type="checkbox" class="de-toggle-similar" ${this.config.similarTitles ? 'checked' : ''} style="width: 20px; height: 20px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span>Show Collection</span>
+                        <input type="checkbox" class="de-toggle-collection" ${this.config.showCollection ? 'checked' : ''} style="width: 20px; height: 20px;">
+                    </div>
+                    <div style="font-size: 13px; ${this.config.tmdbApiKey ? 'color: #22b365;' : 'opacity: 0.6;'}">
+                        ${this.config.tmdbApiKey ? '● Connected to TMDB' : '○ No API key configured'}
+                    </div>
                 </div>
             </div>
         `;
         
         sectionsContainer.appendChild(section);
-        this.attachInlineSettingsListeners(section);
-        this.injectSettingsStyles();
+        this.attachSettingsListeners(section);
     }
 
-    injectSettingsStyles() {
-        if (document.getElementById('de-settings-styles')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'de-settings-styles';
-        style.textContent = `
-            .data-enrichment-settings-section { margin-top: 16px; }
-            .de-settings-content { padding: 0 16px 16px; }
-            .de-settings-content.de-collapsed { display: none; }
-            .de-input { flex: 1; padding: 10px 14px; background: rgba(70, 70, 70, 0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-size: 14px; outline: none; }
-            .de-input:focus { border-color: rgba(255,255,255,0.3); }
-            .de-save-btn { padding: 10px 18px; background: rgba(123, 91, 245, 0.8); border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; }
-            .de-save-btn:hover { background: rgba(123, 91, 245, 1); }
-            .de-hint { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; }
-            .de-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-            .de-toggle { position: relative; width: 50px; height: 28px; }
-            .de-toggle input { opacity: 0; width: 0; height: 0; }
-            .de-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: rgba(70,70,70,0.6); border-radius: 28px; transition: 0.3s; border: 1px solid rgba(255,255,255,0.15); }
-            .de-toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
-            .de-toggle input:checked + .de-toggle-slider { background: rgba(34,179,101,0.7); border-color: rgba(34,179,101,0.9); }
-            .de-toggle input:checked + .de-toggle-slider:before { transform: translateX(22px); }
-            .de-status { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 12px; }
-            .de-status.de-status-active { color: #22b365; }
-        `;
-        document.head.appendChild(style);
-    }
-
-    attachInlineSettingsListeners(section) {
-        const apiInput = section.querySelector('.tmdb-api-input');
+    attachSettingsListeners(section) {
+        const apiInput = section.querySelector('.de-api-input');
         const saveBtn = section.querySelector('.de-save-btn');
-        const status = section.querySelector('.de-status');
+        const status = section.querySelector('div:last-child');
         
         saveBtn?.addEventListener('click', () => {
             this.config.tmdbApiKey = apiInput.value.trim();
@@ -770,23 +1010,22 @@ class DataEnrichment {
             this.cache.clear();
             
             if (this.config.tmdbApiKey) {
-                status.className = 'de-status de-status-active';
+                status.style.color = '#22b365';
                 status.textContent = '● Connected to TMDB';
             } else {
-                status.className = 'de-status';
+                status.style.color = '';
+                status.style.opacity = '0.6';
                 status.textContent = '○ No API key configured';
             }
             
             saveBtn.textContent = '✓ Saved';
-            saveBtn.style.background = 'rgba(34,179,101,0.8)';
-            setTimeout(() => { saveBtn.textContent = 'Save'; saveBtn.style.background = ''; }, 2000);
+            setTimeout(() => { saveBtn.textContent = 'Save'; }, 2000);
         });
         
         const toggles = {
-            '.toggle-enhanced-cast': 'enhancedCast',
-            '.toggle-similar-titles': 'similarTitles',
-            '.toggle-collection': 'showCollection',
-            '.toggle-poster-ratings': 'showRatingsOnPosters'
+            '.de-toggle-cast': 'enhancedCast',
+            '.de-toggle-similar': 'similarTitles',
+            '.de-toggle-collection': 'showCollection'
         };
         
         Object.entries(toggles).forEach(([sel, key]) => {
@@ -795,43 +1034,73 @@ class DataEnrichment {
                 toggle.addEventListener('change', (e) => {
                     this.config[key] = e.target.checked;
                     this.saveConfig();
-                    console.log(`[DataEnrichment] ${key} set to ${e.target.checked}`);
-                    
-                    // Show visual feedback
-                    const row = toggle.closest('.de-toggle-row');
-                    if (row) {
-                        row.style.transition = 'background 0.3s ease';
-                        row.style.background = e.target.checked 
-                            ? 'rgba(76, 175, 80, 0.15)' 
-                            : 'rgba(244, 67, 54, 0.1)';
-                        setTimeout(() => {
-                            row.style.background = '';
-                        }, 500);
-                    }
                 });
             }
         });
     }
 
-
+    cleanup(force = false) {
+        if (!force) return;
+        
+        const container = document.querySelector('.data-enrichment-container');
+        if (container) container.remove();
+        
+        console.log('[DataEnrichment] Cleaned up');
+    }
 
     destroy() {
+        console.log('[DataEnrichment] Destroying plugin...');
+        
         if (this.observer) {
             this.observer.disconnect();
+            this.observer = null;
         }
+        
+        if (this.settingsObserver) {
+            this.settingsObserver.disconnect();
+            this.settingsObserver = null;
+        }
+        
+        if (this.hashChangeHandler) {
+            window.removeEventListener('hashchange', this.hashChangeHandler);
+            this.hashChangeHandler = null;
+        }
+        
+        if (this.checkDebounceTimer) {
+            clearTimeout(this.checkDebounceTimer);
+            this.checkDebounceTimer = null;
+        }
+        
+        if (this.periodicCheckInterval) {
+            clearInterval(this.periodicCheckInterval);
+            this.periodicCheckInterval = null;
+        }
+        
+        if (this.reactCheckTimer) {
+            clearTimeout(this.reactCheckTimer);
+            this.reactCheckTimer = null;
+        }
+        
+        this.currentUrl = null;
+        this.currentImdbId = null;
+        this.currentTmdbId = null;
+        this.cleanup(true);
+        console.log('[DataEnrichment] Plugin destroyed');
     }
 }
 
 // Initialize plugin
-if (document.body) {
-    new DataEnrichment();
-} else {
-    const checkBody = () => {
-        if (document.body) {
-            new DataEnrichment();
-        } else {
-            setTimeout(checkBody, 50);
-        }
-    };
-    checkBody();
-}
+(function initDataEnrichment() {
+    if (document.body) {
+        new DataEnrichment();
+    } else {
+        const checkBody = () => {
+            if (document.body) {
+                new DataEnrichment();
+            } else {
+                setTimeout(checkBody, 50);
+            }
+        };
+        checkBody();
+    }
+})();

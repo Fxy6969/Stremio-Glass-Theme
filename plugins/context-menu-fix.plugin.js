@@ -31,7 +31,17 @@ function waitForElement(selector, timeout = 10000) {
 class ContextMenuFix {
     constructor() {
         this.observer = null;
+        this.navMenuProcessed = new WeakSet();
+        this.seasonDropdownProcessed = new WeakSet();
         this.init();
+    }
+
+    isNavMenuExpanded(buttonWrapper) {
+        const menu = buttonWrapper?.querySelector?.('[class*="menu-container"]');
+        if (!menu) return false;
+        const inner = menu.querySelector?.('[class*="nav-menu-container"]') || menu;
+        const rect = inner.getBoundingClientRect();
+        return rect.height > 20 && rect.width > 10;
     }
 
     init() {
@@ -43,18 +53,61 @@ class ContextMenuFix {
     setupObserver() {
         this.observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        this.checkAndFixContextMenu(node);
-                    }
-                });
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            this.checkAndFixContextMenu(node);
+                            this.checkAndFixSeasonDropdown(node);
+                        }
+                    });
+                } else if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    this.checkAndFixSeasonDropdown(mutation.target);
+                }
             });
         });
 
         this.observer.observe(document.body, {
             childList: true,
-            subtree: true
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
         });
+    }
+
+    findSeasonDropdown(element) {
+        const el = element?.nodeType === Node.ELEMENT_NODE ? element : element?.parentElement;
+        if (!el) return null;
+        const cn = String(el.className || '');
+        const isOpenDropdown = (el.getAttribute?.('role') === 'listbox' || cn.includes('dropdown')) && cn.includes('open');
+        if (isOpenDropdown) return el;
+        return el.querySelector?.('[role="listbox"][class*="open"], [class*="dropdown"][class*="open"]') || null;
+    }
+
+    isSeasonDropdownExpanded(dropdown) {
+        if (!dropdown?.getBoundingClientRect) return false;
+        const rect = dropdown.getBoundingClientRect();
+        const hasOptions = dropdown.querySelector?.('[class*="option-"], .option-HcOSE');
+        return rect.height > 25 && rect.width > 10 && !!hasOptions;
+    }
+
+    checkAndFixSeasonDropdown(element) {
+        const dropdown = this.findSeasonDropdown(element);
+        if (!dropdown) return;
+        if (dropdown.closest('.context-menu-portal')) return;
+        if (this.seasonDropdownProcessed.has(dropdown)) return;
+
+        const tryMove = (attempt = 0) => {
+            if (!dropdown.isConnected || dropdown.closest('.context-menu-portal')) return;
+            if (this.seasonDropdownProcessed.has(dropdown)) return;
+            if (this.isSeasonDropdownExpanded(dropdown)) {
+                this.moveSeasonDropdownToBody(dropdown);
+                return;
+            }
+            if (attempt < 5) {
+                setTimeout(() => tryMove(attempt + 1), 35 + attempt * 30);
+            }
+        };
+        requestAnimationFrame(() => requestAnimationFrame(() => tryMove(0)));
     }
 
     checkAndFixContextMenu(element) {
@@ -95,14 +148,10 @@ class ContextMenuFix {
         }
     }
 
-    moveMenuToBody(menuContainer) {
-        // Get current position before moving
+    moveMenuToBody(menuContainer, isNavMenu = false) {
         const rect = menuContainer.getBoundingClientRect();
-        
-        // Store original parent for potential cleanup
         const originalParent = menuContainer.parentElement;
-        
-        // Create a wrapper if needed to maintain React's DOM expectations
+
         const wrapper = document.createElement('div');
         wrapper.className = 'context-menu-portal';
         wrapper.style.cssText = `
@@ -115,10 +164,8 @@ class ContextMenuFix {
             z-index: 2147483647;
         `;
 
-        // Clone the menu to avoid breaking React's reference
+        // Context menu: clone and hide original (keeps React refs intact)
         const menuClone = menuContainer.cloneNode(true);
-        
-        // Preserve all original classes and add positioning
         menuClone.style.position = 'fixed';
         menuClone.style.top = `${rect.top}px`;
         menuClone.style.left = `${rect.left}px`;
@@ -130,27 +177,24 @@ class ContextMenuFix {
         wrapper.appendChild(menuClone);
         document.body.appendChild(wrapper);
 
-        // Hide the original (don't remove it to keep React happy)
         menuContainer.style.visibility = 'hidden';
+        menuContainer.style.opacity = '0';
         menuContainer.style.pointerEvents = 'none';
+        menuContainer.style.position = 'fixed';
+        menuContainer.style.left = '-9999px';
+        menuContainer.style.top = '0';
 
-        // Add click handlers to the cloned menu options (handle multiple class variations)
         const options = menuClone.querySelectorAll('[class*="context-menu-option-container"]');
         options.forEach((option) => {
             option.style.pointerEvents = 'auto';
             option.addEventListener('click', (e) => {
-                // Find and click the corresponding original option
                 const originalOptions = menuContainer.querySelectorAll('[class*="context-menu-option-container"]');
                 const index = Array.from(options).indexOf(option);
-                if (originalOptions[index]) {
-                    originalOptions[index].click();
-                }
-                // Clean up
+                if (originalOptions[index]) originalOptions[index].click();
                 this.cleanup(wrapper, menuContainer);
             });
         });
 
-        // Close menu when clicking outside
         const closeHandler = (e) => {
             if (!wrapper.contains(e.target)) {
                 this.cleanup(wrapper, menuContainer);
@@ -158,14 +202,11 @@ class ContextMenuFix {
                 document.removeEventListener('contextmenu', closeHandler, true);
             }
         };
-
-        // Use capture to catch clicks before they bubble
         setTimeout(() => {
             document.addEventListener('click', closeHandler, true);
             document.addEventListener('contextmenu', closeHandler, true);
         }, 10);
 
-        // Also watch for the original menu being removed
         const removalObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.removedNodes.forEach((node) => {
@@ -176,7 +217,6 @@ class ContextMenuFix {
                 });
             });
         });
-
         if (originalParent) {
             removalObserver.observe(originalParent, { childList: true, subtree: true });
         }

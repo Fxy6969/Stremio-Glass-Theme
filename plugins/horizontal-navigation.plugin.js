@@ -1,7 +1,7 @@
 /**
  * @name Horizontal Navigation
  * @description Moves your vertical navigation bar to a horizontal position.
- * @version 1.0.0
+ * @version 26.0.1
  * @author Fxy
  */
 

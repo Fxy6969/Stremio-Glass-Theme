@@ -1,7 +1,7 @@
 /**
  * @name Dynamic Hero
  * @description Netflix-style rotating hero banner.
- * @version 1.0.1
+ * @version 26.0.1
  * @author Fxy
  */
 
@@ -142,7 +142,6 @@
     if (cleanRuntime.match(/^\d+\s*min$/i)) {
       return cleanRuntime;
     }
-  }
 
     return cleanRuntime || "Unknown";
   }
