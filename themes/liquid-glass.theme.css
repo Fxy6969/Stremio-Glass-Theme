@@ -1,9 +1,8 @@
 /**
  * @name Modern Glass
  * @description A theme that takes advantage of Modern Glass Styles with Light and Dark Theme.
- * @version 1.0.1
+ * @version 26.0.1
  * @updateUrl https://github.com/Fxy6969/Streamio-Glass-Theme/tree/cover
- * @author Fxy/Moerat
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
@@ -321,6 +320,7 @@ html body {
 }
 
 /* Style any menu/button container in the top nav */
+#app nav[class*="horizontal-nav-bar"] > div[class*="button-container"],
 #app
     nav[class*="horizontal-nav-bar"]
     > div[class*="button-container"],
@@ -423,9 +423,14 @@ html body {
 }
 
 /* settings menu */
-
-.nav-menu-container-Pl25j,
+.menu-container-B6cqK,
+.menu-direction-bottom-left-Dvtqk,
 .nav-menu-container-Pl25j {
+    background-color: transparent !important;
+}
+
+.context-menu-portal .menu-container-B6cqK,
+.context-menu-portal [class*="menu-container"][class*="menu-direction"] {
     background-color: transparent !important;
 }
 
@@ -1538,6 +1543,18 @@ body.ghost-clicking #heroLoadingScreen {
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
+.meta-links-container-dh69_ .links-container-C8Mw9 {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    gap: 8px !important;
+    height: auto !important;
+    min-height: 32px !important;
+}
+
 .meta-links-container-dh69_ .links-container-C8Mw9 .link-container-gHxPW {
     background: rgba(70, 70, 70, 0.22) !important;
     backdrop-filter: var(--backdrop-filter) !important;
@@ -2479,4 +2496,418 @@ body.ghost-clicking #heroLoadingScreen {
     background: rgba(255, 152, 0, 0.15) !important;
     color: rgba(255, 183, 77, 1) !important;
     border: 1px solid rgba(255, 152, 0, 0.2) !important;
+}
+
+/* Enhanced Video Player - Subtitle Customization Styles (Stremio Style) */
+
+/* Main Container */
+.enhanced-subtitle-customize-section {
+    align-self: stretch;
+    color: var(--primary-foreground-color);
+    flex: none;
+    font-weight: 500;
+    padding: 1.5rem 1.75rem;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    border-radius: 8px;
+}
+
+.enhanced-subtitle-customize-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.enhanced-subtitle-customize-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+.enhanced-subtitle-customize-section::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.enhanced-subtitle-customize-section::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Header */
+.enhanced-subtitle-customize-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: inherit;
+    opacity: 0.95;
+    letter-spacing: -0.01em;
+}
+
+.enhanced-header-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Presets Bar */
+.enhanced-subtitle-presets-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.enhanced-subtitle-preset-btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    flex-shrink: 0;
+    white-space: nowrap;
+    position: relative;
+    letter-spacing: 0.01em;
+}
+
+.enhanced-subtitle-preset-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.enhanced-subtitle-preset-btn.selected {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.12) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.enhanced-subtitle-preset-btn:active {
+    transform: translateY(0);
+}
+
+/* Preview Section */
+.enhanced-subtitle-preview-section {
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.enhanced-subtitle-preview-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.enhanced-subtitle-preview-box {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-subtitle-preview-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.02) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(255, 255, 255, 0.03) 0%,
+            transparent 70%
+        );
+    pointer-events: none;
+}
+
+.enhanced-subtitle-preview-text {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 8px 16px;
+    display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
+    /* Default styles that will be overridden by JavaScript */
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.8);
+    outline: 1px solid black;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    letter-spacing: normal;
+    line-height: 1.4;
+}
+
+/* Settings Grid */
+.enhanced-settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 12px;
+}
+
+/* Stepper Control */
+.enhanced-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.enhanced-stepper-header {
+    font-size: 12px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.enhanced-stepper-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.enhanced-stepper-button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    padding: 0;
+}
+
+.enhanced-stepper-button:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: scale(1.05);
+}
+
+.enhanced-stepper-button:active:not(.disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.98);
+}
+
+.enhanced-stepper-button.disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.enhanced-stepper-icon {
+    width: 14px;
+    height: 14px;
+    color: white;
+}
+
+.enhanced-stepper-value {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+    letter-spacing: 0.02em;
+}
+
+/* Select Control */
+.enhanced-select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.enhanced-select-header {
+    font-size: 12px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.enhanced-select {
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.enhanced-select:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.enhanced-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+.enhanced-select option {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 8px;
+}
+
+/* Color Picker Control */
+.enhanced-color-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.enhanced-color-header {
+    font-size: 12px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.enhanced-color-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.enhanced-color-input {
+    width: 44px;
+    height: 32px;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.enhanced-color-input:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+.enhanced-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.enhanced-color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 2px;
+}
+
+.enhanced-color-value {
+    font-size: 12px;
+    color: inherit;
+    opacity: 0.7;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    flex: 1;
+    font-family: "Courier New", monospace;
+}
+
+/* Text Input Control */
+.enhanced-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    grid-column: 1 / -1; /* Full width for text inputs */
+}
+
+.enhanced-text-header {
+    font-size: 12px;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.enhanced-text-input {
+    padding: 8px 11px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: inherit;
+    font-size: 12px;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: "Courier New", monospace;
+}
+
+.enhanced-text-input:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.enhanced-text-input:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+.enhanced-text-input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+    font-style: italic;
 }
