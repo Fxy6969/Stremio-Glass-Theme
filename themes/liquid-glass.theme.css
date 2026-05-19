@@ -471,7 +471,6 @@ html body {
         inset 0 -1px 0 rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: var(--backdrop-filter) !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
-    opacity: 1 !important;
 }
 
 .next-video-popup-container-H4wnL .button-container-i4F7t.play-button-Dluk6 {
