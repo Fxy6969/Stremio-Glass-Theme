@@ -1,7 +1,7 @@
 /**
  * @name Dynamic Hero
  * @description Netflix-style rotating hero banner.
- * @version 26.0.1
+ * @version 26.0.2
  * @author Fxy
  */
 
@@ -142,7 +142,6 @@
     if (cleanRuntime.match(/^\d+\s*min$/i)) {
       return cleanRuntime;
     }
-  }
 
     return cleanRuntime || "Unknown";
   }
@@ -551,6 +550,139 @@
     }
 
     return `
+            <style>
+                .board-container-DTN_b, 
+                [class*="board-container"] {
+                    display: block !important;
+                }
+                .hero-container {
+                    position: relative;
+                    left: 50% !important;
+                    right: 50% !important;
+                    margin-left: -50vw !important;
+                    margin-right: -50vw !important;
+                    width: 100vw !important;
+                    
+                    aspect-ratio: 16 / 5 !important; 
+                    min-height: 900px;
+                    max-height: 90vh;  
+                    
+                    overflow: hidden;
+                    background-color: #141414;
+                    margin-top: -15px !important;
+                    margin-bottom: 20px;
+                    display: block !important;
+                    box-sizing: border-box;
+                }
+
+                .hero-image {
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: cover !important; 
+                    object-position: center top;
+                    display: block !important;
+                }
+
+                .hero-overlay {
+                    position: absolute;
+                    top: 0; left: 0; right: 0; bottom: 0;
+
+                    background: linear-gradient(90deg, rgba(20,20,20,0.96) 0%, rgba(20,20,20,0.3) 0%, rgba(100,20,20,0) 80%),
+                                linear-gradient(0deg, #141414 0%, rgba(20,20,20,0.7) 0%, rgba(20,20,20,0) 35%);
+                    
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end; 
+                    
+                    padding-left: calc(50vw - 46%) !important;
+                    padding-right: calc(50vw - 46%) !important;
+                    padding-bottom: 60px !important; 
+                    
+                    color: #fff;
+                    z-index: 2;
+                    box-sizing: border-box;
+                }
+
+                .hero-overlay-image {
+                    max-width: 480px;
+                    max-height: 300px; 
+                    object-fit: contain;
+                    margin-bottom: 20px;
+                }
+
+                .hero-overlay-description {
+                    max-width: 500px;
+                    font-size: 16px;
+                    line-height: 1.4;
+                    margin-bottom: 15px;
+                    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+                }
+
+                .hero-overlay-info {
+                    display: flex;
+                    gap: 15px;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+
+                .hero-overlay-actions {
+                    display: flex;
+                    gap: 10px;
+                }
+
+                .hero-overlay-button-watch, .hero-overlay-button {
+                    padding: 10px 24px;
+                    border: none;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .hero-overlay-button-watch { 
+                    background-color: #e50914; 
+                    color: #ffffff !important; 
+                }
+                .hero-overlay-button-watch:hover { background-color: #b80710; }
+                
+                .hero-overlay-button { background-color: rgba(109, 109, 110, 0.7); color: #fff; }
+                .hero-overlay-button:hover { background-color: rgba(109, 109, 110, 0.4); }
+
+                .hero-controls {
+                    position: absolute;
+                    right: calc(50vw - 46%);
+                    bottom: 20px;
+                    display: flex;
+                    gap: 10px;
+                    z-index: 10;
+                }
+                .hero-control-btn {
+                    background: rgba(0,0,0,0.5);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 5px 12px;
+                    cursor: pointer;
+                    border-radius: 4px;
+                }
+
+                .hero-indicators {
+                    position: absolute;
+                    bottom: 20px; left: 50%;
+                    transform: translateX(-50%);
+                    display: flex; gap: 8px;
+                    z-index: 10;
+                }
+                .hero-indicator {
+                    width: 12px; height: 12px;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.4);
+                    cursor: pointer;
+                }
+                .hero-indicator.active { background: #fff; }
+            </style>
+
             <div class="hero-container">
                 <img src="${title.background}" alt="Hero Background" class="hero-image" id="heroImage">
                 <div class="hero-overlay">
