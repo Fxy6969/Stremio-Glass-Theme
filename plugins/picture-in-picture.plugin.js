@@ -1,7 +1,7 @@
 /**
  * @name Picture in Picture
  * @description Adds a picture in picture button to the video player.
- * @version 26.0.1
+ * @version 26.0.2
  * @author Fxy
  */
 
@@ -11,6 +11,12 @@ class PictureInPicturePlugin {
   }
 
   init() {
+    // Wait for document.body to be available
+    if (!document.body) {
+      setTimeout(() => this.init(), 50);
+      return;
+    }
+
     this.addPiPButton();
     setTimeout(() => this.addPiPButton(), 500);
     const observer = new MutationObserver(() => this.addPiPButton());
