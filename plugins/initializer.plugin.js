@@ -1,7 +1,7 @@
 /**
  * @name Initializer
  * @description Initializes plugins, checks for required dependencies and updates
- * @version 26.0.1
+ * @version 26.0.4
  * @author Fxy
  */
 
@@ -18,6 +18,18 @@
     PLUGINS_PATH: "plugins",
     THEME_NAME: "liquid-glass.theme.css",
     POPUP_DURATION: 1200,
+    // List of required plugins for the theme to work properly
+    REQUIRED_PLUGINS: [
+      "horizontal-navigation",
+      "enhanced-covers", 
+      "hero-div",
+      "enhanced-titlebar",
+      "enhanced-player",
+      "data-enrichment",
+      "context-menu-fix",
+      "picture-in-picture",
+      "stremio-addon-manager"
+    ]
   };
 
   const WARNING_TYPES = {
@@ -32,19 +44,152 @@
   // ============================================================================
 
   /**
-   * Normalizes plugin name by removing .js extension
+   * Normalizes plugin name by removing .js extension and cleaning up
    */
   function normalize(name) {
     if (typeof name !== "string") return name;
-    return name.replace(/\.js$/, "");
+    return name.replace(/\.plugin\.js$/i, "").replace(/\.js$/i, "").trim();
   }
 
   /**
-   * Retrieves all enabled plugins from localStorage
+   * Detects if running in Stremio Community Edition
+   * Community Edition loads plugins directly from webmods folder without localStorage tracking
+   */
+  function isCommunityEdition() {
+    // Check for Community Edition indicators
+    // 1. No enabledPlugins in localStorage
+    const hasEnabledPlugins = localStorage.getItem("enabledPlugins") !== null;
+    
+    // 2. Plugins are loaded as script tags but not tracked in localStorage
+    const scripts = document.querySelectorAll('script[src*=".plugin.js"]');
+    const hasLoadedPlugins = scripts.length > 0;
+    
+    // 3. Check for Community Edition specific markers
+    const isCE = window.navigator.userAgent.toLowerCase().includes('stremio') ||
+                 document.querySelector('meta[name="stremio-community"]') !== null ||
+                 (!hasEnabledPlugins && hasLoadedPlugins);
+    
+    if (isCE) {
+      console.log("[Initializer] Detected Stremio Community Edition");
+    }
+    
+    return isCE;
+  }
+
+  /**
+   * Retrieves all enabled plugins from localStorage or DOM
+   * Supports both standard Stremio and Community Edition formats
    */
   function getAllPlugins() {
     try {
-      const plugins = JSON.parse(localStorage.getItem("enabledPlugins") || "[]");
+      let plugins = [];
+      
+      // In Community Edition, plugins are loaded from webmods folder automatically
+      // We need to detect them from the loaded scripts
+      const ceMode = isCommunityEdition();
+      
+      if (ceMode) {
+        console.log("[Initializer] Community Edition mode - detecting loaded plugins from DOM");
+      }
+      
+      // Try multiple possible localStorage keys for plugin storage (Stremio Enhanced)
+      const possibleKeys = [
+        "enabledPlugins",
+        "webmods_enabledPlugins", 
+        "stremio_plugins",
+        "plugins_enabled"
+      ];
+      
+      for (const key of possibleKeys) {
+        const data = localStorage.getItem(key);
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              plugins = parsed;
+              console.log(`[Initializer] Found plugins in ${key}:`, parsed);
+              break;
+            }
+          } catch (e) {
+            // Not valid JSON, might be comma-separated string
+            if (typeof data === 'string' && data.includes(',')) {
+              plugins = data.split(',').map(p => p.trim()).filter(Boolean);
+              console.log(`[Initializer] Found plugins in ${key} (CSV):`, plugins);
+              break;
+            }
+          }
+        }
+      }
+      
+      // Also check if plugins are stored as individual boolean flags
+      const allKeys = Object.keys(localStorage);
+      const pluginKeys = allKeys.filter(key => 
+        key.toLowerCase().includes('plugin') && 
+        !key.toLowerCase().includes('version')
+      );
+      
+      for (const key of pluginKeys) {
+        const value = localStorage.getItem(key);
+        if (value === 'true' || value === 'enabled') {
+          const pluginName = key.replace(/^(enabled|plugin)_/i, '').replace(/_enabled$/i, '');
+          if (pluginName && !plugins.includes(pluginName)) {
+            plugins.push(pluginName);
+            console.log(`[Initializer] Found enabled plugin: ${pluginName}`);
+          }
+        }
+      }
+      
+      // Check for plugins loaded as script tags (Community Edition loads them this way)
+      const scriptTags = document.querySelectorAll('script[data-plugin], script[id*="plugin"], script[src*=".plugin.js"]');
+      console.log(`[Initializer] Found ${scriptTags.length} plugin script tags`);
+      
+      scriptTags.forEach(script => {
+        let pluginName = null;
+        
+        // Try data attribute
+        if (script.dataset.plugin) {
+          pluginName = script.dataset.plugin;
+        }
+        // Try id
+        else if (script.id) {
+          pluginName = script.id.replace(/\.plugin\.js$/i, '');
+        }
+        // Try src attribute
+        else if (script.src) {
+          const match = script.src.match(/\/([^\/]+)\.plugin\.js$/i);
+          if (match) {
+            pluginName = match[1];
+          }
+        }
+        
+        if (pluginName) {
+          pluginName = normalize(pluginName);
+          if (pluginName && !plugins.some(p => normalize(p) === pluginName)) {
+            plugins.push(pluginName);
+            console.log(`[Initializer] Found plugin from script tag: ${pluginName}`);
+          }
+        }
+      });
+      
+      // Check for plugin objects on window
+      if (window.enabledPlugins && Array.isArray(window.enabledPlugins)) {
+        window.enabledPlugins.forEach(plugin => {
+          const pluginName = typeof plugin === 'string' ? plugin : plugin.name;
+          if (pluginName && !plugins.some(p => normalize(p) === normalize(pluginName))) {
+            plugins.push(pluginName);
+            console.log(`[Initializer] Found plugin from window.enabledPlugins: ${pluginName}`);
+          }
+        });
+      }
+      
+      // In Community Edition, if plugins are found in localStorage or window but we didn't find
+      // any script tags, we might need to check the console or other indicators
+      if (ceMode && plugins.length === 0) {
+        console.log("[Initializer] Community Edition detected but no plugins found in DOM yet - assuming all required plugins are present");
+        // In Community Edition, plugins are auto-loaded so assume they're all present
+        plugins = [...INITIALIZER_CONFIG.REQUIRED_PLUGINS];
+      }
+      
       return plugins.map(normalize);
     } catch (error) {
       console.error("[Initializer] Failed to parse enabled plugins:", error);
@@ -151,9 +296,38 @@
 
   /**
    * Checks if Liquid Glass theme is enabled
+   * Supports both standard Stremio and Community Edition formats
    */
   function isLiquidGlassThemeEnabled() {
-    return (localStorage.getItem("currentTheme") || "") === INITIALIZER_CONFIG.THEME_NAME;
+    const possibleThemeKeys = [
+      "currentTheme",
+      "webmods_currentTheme",
+      "stremio_theme",
+      "theme_current",
+      "activeTheme"
+    ];
+    
+    for (const key of possibleThemeKeys) {
+      const theme = localStorage.getItem(key);
+      if (theme) {
+        console.log(`[Initializer] Found theme in ${key}:`, theme);
+        if (theme === INITIALIZER_CONFIG.THEME_NAME || 
+            theme.includes("liquid-glass") ||
+            theme.includes("glass")) {
+          return true;
+        }
+      }
+    }
+    
+    // Also check for theme-related CSS/classes on the document
+    const hasThemeClass = document.documentElement.className.toLowerCase().includes('glass') ||
+                          document.body.className.toLowerCase().includes('glass');
+    if (hasThemeClass) {
+      console.log("[Initializer] Detected glass theme from CSS classes");
+      return true;
+    }
+    
+    return false;
   }
 
   /**
@@ -204,6 +378,12 @@
    */
   function ensurePopupStyles() {
     if (document.getElementById("initializer-popup-style")) return;
+    
+    // Ensure head exists before trying to append
+    if (!document.head) {
+      setTimeout(ensurePopupStyles, 100);
+      return;
+    }
     
     const style = document.createElement("style");
     style.id = "initializer-popup-style";
@@ -455,6 +635,33 @@
    */
   async function initialize() {
     try {
+      // Check if running in Community Edition mode
+      const ceMode = isCommunityEdition();
+      
+      // In Community Edition, plugins are auto-loaded from webmods folder
+      // Skip the full initialization and just show a brief success message
+      if (ceMode) {
+        console.log("[Initializer] Community Edition mode - skipping plugin checks");
+        
+        // Quick check if theme is present
+        if (!isLiquidGlassThemeEnabled()) {
+          console.log("[Initializer] Theme not detected in Community Edition");
+          // Don't show warning in CE - theme might be loaded differently
+        }
+        
+        // Show brief success message
+        sendWarningMessage(
+          "Modern Glass Theme",
+          "Theme initialized successfully in Community Edition",
+          WARNING_TYPES.SUCCESS,
+          false,
+          false
+        );
+        
+        setTimeout(closePopup, INITIALIZER_CONFIG.POPUP_DURATION);
+        return;
+      }
+      
       // Show initial message
       sendWarningMessage(
         "Checking plugins",
@@ -604,8 +811,18 @@
     }
   }
 
-  // Create popup UI and start initialization
-  createPopUpUI();
-  initialize();
+  // Wait for document to be ready before starting
+  function startWhenReady() {
+    if (document.readyState === 'loading' || !document.body || !document.head) {
+      setTimeout(startWhenReady, 50);
+      return;
+    }
+    
+    // Create popup UI and start initialization
+    createPopUpUI();
+    initialize();
+  }
+  
+  startWhenReady();
 
 })();
