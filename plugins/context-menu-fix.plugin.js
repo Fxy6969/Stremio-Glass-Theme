@@ -22,6 +22,26 @@ function waitForElement(selector, timeout = 10000) {
     });
 }
 
+// Clones live outside Stremio's popup, so pressing one makes Stremio close (and unmount)
+// the real popup on mousedown, and the clone gets removed with it, before any click fires.
+// Forward on mousedown while the original is still mounted, then swallow only this
+// gesture's trailing click so it can't land on whatever sat underneath the clone.
+function forwardPress(cloneEl, getTarget, done) {
+    cloneEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const target = getTarget();
+        if (target && target.isConnected) target.click();
+        const swallow = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+        document.addEventListener('click', swallow, { capture: true, once: true });
+        document.addEventListener('mouseup', () => {
+            setTimeout(() => document.removeEventListener('click', swallow, true), 0);
+        }, { capture: true, once: true });
+        done();
+    }, true);
+}
+
 /**
  * @name Context Menu Fix
  * @description Fixes context menus appearing behind UI elements by moving them to the document root.
@@ -31,17 +51,8 @@ function waitForElement(selector, timeout = 10000) {
 class ContextMenuFix {
     constructor() {
         this.observer = null;
-        this.navMenuProcessed = new WeakSet();
         this.seasonDropdownProcessed = new WeakSet();
         this.init();
-    }
-
-    isNavMenuExpanded(buttonWrapper) {
-        const menu = buttonWrapper?.querySelector?.('[class*="menu-container"]');
-        if (!menu) return false;
-        const inner = menu.querySelector?.('[class*="nav-menu-container"]') || menu;
-        const rect = inner.getBoundingClientRect();
-        return rect.height > 20 && rect.width > 10;
     }
 
     init() {
@@ -141,7 +152,7 @@ class ContextMenuFix {
         if (menuContainer.parentElement === document.body) return;
         if (menuContainer.closest('.context-menu-portal')) return;
 
-        // Nav menu (avatar dropdown) — bring to front so blur works; use real node so it can expand
+        // Nav menu (avatar dropdown) — detected so we can leave it alone (see below)
         const isNavMenu = menuContainer.querySelector?.('.user-info-container-uigVE, [class*="user-info-container"]') ||
                          menuContainer.querySelector?.('.nav-menu-section-j87xd, [class*="nav-menu-section"]') ||
                          menuContainer.querySelector?.('.nav-menu-container-Pl25j, [class*="nav-menu-container"]');
@@ -149,148 +160,11 @@ class ContextMenuFix {
         // Problematic container (side drawer, player, etc.)
         const problematicParent = menuContainer.closest('.side-drawer-r9EuA, [class*="side-drawer"], .series-content-VkYHB, [class*="series-content"], .player-container-wIELK, [class*="player-container"], .theater-container, .player-video');
 
-        if (isNavMenu || problematicParent) {
-            const asNav = !!isNavMenu;
-            if (asNav) {
-                const buttonWrapper = menuContainer.closest('.menu-button-container-DtW4v, [class*="menu-button-container"], .nav-menu-popup-label-XmUBo, [class*="nav-menu-popup-label"], .label-container-XOyzm') || menuContainer.parentElement;
-                if (!buttonWrapper?.isConnected || buttonWrapper.closest('.context-menu-portal') || this.navMenuProcessed.has(buttonWrapper)) return;
-
-                const tryMove = (attempt = 0) => {
-                    if (!buttonWrapper.isConnected || buttonWrapper.closest('.context-menu-portal')) return;
-                    if (this.navMenuProcessed.has(buttonWrapper)) return;
-                    if (this.isNavMenuExpanded(buttonWrapper)) {
-                        this.moveNavMenuToBody(buttonWrapper, menuContainer);
-                        return;
-                    }
-                    if (attempt < 5) {
-                        setTimeout(() => tryMove(attempt + 1), 35 + attempt * 30);
-                    }
-                };
-                requestAnimationFrame(() => requestAnimationFrame(() => tryMove(0)));
-            } else {
-                this.moveMenuToBody(menuContainer, false);
-            }
-        }
-    }
-
-    moveNavMenuToBody(buttonWrapper, menuContainer) {
-        if (!this.isNavMenuExpanded(buttonWrapper)) return;
-        if (this.navMenuProcessed.has(buttonWrapper)) return;
-        this.navMenuProcessed.add(buttonWrapper);
-
-        const rect = buttonWrapper.getBoundingClientRect();
-        const originalParent = buttonWrapper.parentElement;
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'context-menu-portal';
-        wrapper.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2147483647;
-        `;
-
-        // Clone the whole button (trigger + expanded dropdown) so content is already there
-        const buttonClone = buttonWrapper.cloneNode(true);
-        buttonClone.style.position = 'fixed';
-        buttonClone.style.top = `${rect.top}px`;
-        buttonClone.style.left = `${rect.left}px`;
-        buttonClone.style.zIndex = '2147483647';
-        buttonClone.style.pointerEvents = 'auto';
-        buttonClone.style.visibility = 'visible';
-        buttonClone.style.opacity = '1';
-        buttonClone.style.isolation = 'isolate';
-
-        const menuInClone = buttonClone.querySelector('[class*="menu-container"]');
-        if (menuInClone) {
-            const inner = menuInClone.querySelector('.nav-menu-container-Pl25j, [class*="nav-menu-container"]') || menuInClone;
-            inner.style.backdropFilter = 'blur(12px)';
-            inner.style.webkitBackdropFilter = 'blur(12px)';
-            const bg = getComputedStyle(inner).backgroundColor;
-            if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') {
-                inner.style.backgroundColor = 'rgba(26, 26, 26, 0.85)';
-            }
-        }
-
-        wrapper.appendChild(buttonClone);
-        document.body.appendChild(wrapper);
-
-        buttonWrapper.style.pointerEvents = 'none';
-        menuContainer.style.opacity = '0';
-        menuContainer.style.pointerEvents = 'none';
-        menuContainer.style.position = 'fixed';
-        menuContainer.style.left = '-9999px';
-        menuContainer.style.top = '0';
-
-        const optionSelectors = '[class*="nav-menu-option-container"], [class*="logout-button-container"]';
-        const cloneOptions = buttonClone.querySelectorAll(optionSelectors);
-        const originalOptions = buttonWrapper.querySelectorAll(optionSelectors);
-        cloneOptions.forEach((opt, i) => {
-            opt.style.pointerEvents = 'auto';
-            opt.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (originalOptions[i]) originalOptions[i].click();
-                this.cleanupNavMenu(wrapper, buttonWrapper, menuContainer);
-            });
-        });
-        buttonClone.querySelectorAll('a[href]').forEach((link, i) => {
-            link.style.pointerEvents = 'auto';
-            const origLinks = buttonWrapper.querySelectorAll('a[href]');
-            if (origLinks[i]) {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    origLinks[i].click();
-                    this.cleanupNavMenu(wrapper, buttonWrapper, menuContainer);
-                });
-            }
-        });
-
-        const closeHandler = (e) => {
-            if (!wrapper.contains(e.target)) {
-                this.cleanupNavMenu(wrapper, buttonWrapper, menuContainer);
-                document.removeEventListener('click', closeHandler, true);
-                document.removeEventListener('contextmenu', closeHandler, true);
-            }
-        };
-        setTimeout(() => {
-            document.addEventListener('click', closeHandler, true);
-            document.addEventListener('contextmenu', closeHandler, true);
-        }, 10);
-
-        const removalObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.removedNodes.forEach((node) => {
-                    if (node === buttonWrapper || node.contains?.(buttonWrapper)) {
-                        this.navMenuProcessed.delete(buttonWrapper);
-                        if (wrapper.parentElement) wrapper.remove();
-                        removalObserver.disconnect();
-                    }
-                });
-            });
-        });
-        if (originalParent) removalObserver.observe(originalParent, { childList: true, subtree: true });
-
-        console.log('[ContextMenuFix] Cloned whole nav button to body');
-    }
-
-    cleanupNavMenu(wrapper, buttonWrapper, menuContainer) {
-        if (wrapper?.parentElement) wrapper.remove();
-        if (buttonWrapper) {
-            this.navMenuProcessed.delete(buttonWrapper);
-            buttonWrapper.style.visibility = '';
-            buttonWrapper.style.pointerEvents = '';
-        }
-        if (menuContainer?.style) {
-            menuContainer.style.visibility = '';
-            menuContainer.style.opacity = '';
-            menuContainer.style.pointerEvents = '';
-            menuContainer.style.position = '';
-            menuContainer.style.left = '';
-            menuContainer.style.top = '';
-        }
+        // The avatar/nav menu renders fine on its own. Cloning the whole button into <body>
+        // lost the header-scoped CSS (avatar blew up, chevron showed, menu dropped) and the
+        // copy's items were dead because Stremio unmounts the real menu. Leave it native.
+        if (isNavMenu) return;
+        if (problematicParent) this.moveMenuToBody(menuContainer, false);
     }
 
     moveSeasonDropdownToBody(dropdown) {
@@ -345,11 +219,8 @@ class ContextMenuFix {
         const originalOptions = dropdown.querySelectorAll(optionSelector);
         cloneOptions.forEach((opt, i) => {
             opt.style.pointerEvents = 'auto';
-            opt.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (originalOptions[i]) originalOptions[i].click();
-                this.cleanupSeasonDropdown(wrapper, dropdown);
-            });
+            forwardPress(opt, () => originalOptions[i],
+                () => this.cleanupSeasonDropdown(wrapper, dropdown));
         });
 
         const closeHandler = (e) => {
@@ -432,12 +303,10 @@ class ContextMenuFix {
         const options = menuClone.querySelectorAll('[class*="context-menu-option-container"]');
         options.forEach((option) => {
             option.style.pointerEvents = 'auto';
-            option.addEventListener('click', (e) => {
+            forwardPress(option, () => {
                 const originalOptions = menuContainer.querySelectorAll('[class*="context-menu-option-container"]');
-                const index = Array.from(options).indexOf(option);
-                if (originalOptions[index]) originalOptions[index].click();
-                this.cleanup(wrapper, menuContainer);
-            });
+                return originalOptions[Array.from(options).indexOf(option)];
+            }, () => this.cleanup(wrapper, menuContainer));
         });
 
         const closeHandler = (e) => {
